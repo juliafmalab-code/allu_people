@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Recrutamento</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --green:        #1a5c38;
+            --green-mid:    #2d7a50;
+            --green-bg:     #eaf5ef;
+            --green-chart:  #2d7a50;
+            --green-light:  #a8d9bb;
+            --bg:           #f5f7fb;
+            --card:         #ffffff;
+            --border:       #e4e9f0;
+            --text:         #1a2332;
+            --text-2:       #6b7c93;
+            --text-3:       #a0b0c4;
+            --amber:        #d97706;
+            --amber-bg:     #fef3e2;
+            --red:          #dc4a3d;
+            --red-bg:       #fef0ef;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+
+        /* ── Header ── */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            background: var(--card); border-bottom: 1px solid var(--border);
+            padding: 0 32px; height: 56px;
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 16px;
+        }
+
+        .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo-mark {
+            width: 30px; height: 30px; background: var(--green); border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 700; font-size: 0.85rem; letter-spacing: -0.5px; flex-shrink: 0;
+        }
+        .logo-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+
+        .nav-period { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .nav-period > button {
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text-2); padding: 5px 12px; border-radius: 6px; cursor: pointer;
+            font-size: 0.78rem; font-weight: 500; transition: all 0.15s; font-family: inherit;
+        }
+        .nav-period > button:hover { background: var(--bg); color: var(--text); border-color: #c8d3e0; }
+        #labelMes { font-size: 0.875rem; font-weight: 600; color: var(--text); min-width: 100px; text-align: center; }
+
+        .period-sep { color: var(--border); font-size: 1.1rem; margin: 0 2px; }
+        .date-range-wrap { display: flex; align-items: center; gap: 7px; }
+        .date-range-wrap label { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-2); white-space: nowrap; }
+        .date-range-wrap input[type="date"] {
+            background: var(--bg); border: 1px solid var(--border); color: var(--text);
+            padding: 4px 8px; border-radius: 6px; font-size: 0.72rem; cursor: pointer;
+            width: 126px; font-family: inherit;
+        }
+        .date-range-wrap input[type="date"]:focus { outline: none; border-color: var(--green-mid); }
+        .btn-reset-periodo {
+            background: transparent; border: 1px solid var(--border); color: var(--text-2);
+            padding: 4px 9px; border-radius: 6px; cursor: pointer; font-size: 0.7rem;
+            display: none; font-family: inherit;
+        }
+        .btn-reset-periodo:hover { background: var(--bg); }
+
+        /* ── Main ── */
+        main { padding: 28px 32px; max-width: 1400px; margin: 0 auto; }
+
+        .page-header { margin-bottom: 28px; }
+        .page-title { font-size: 1.4rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+        .page-subtitle { font-size: 0.8rem; color: var(--text-2); margin-top: 3px; }
+
+        /* ── Section titles ── */
+        .section-title {
+            display: flex; align-items: baseline; gap: 7px;
+            font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 1.1px; color: var(--text);
+            margin-bottom: 14px; margin-top: 36px;
+        }
+        .section-title .st-sub {
+            font-size: 0.72rem; font-weight: 400; text-transform: none;
+            letter-spacing: 0; color: var(--text-2);
+        }
+
+        /* ── Generic card ── */
+        .card {
+            background: var(--card); border-radius: 10px; padding: 20px 22px;
+            border: 1px solid var(--border);
+        }
+        .card h3 {
+            font-size: 0.8rem; font-weight: 600; color: var(--text);
+            margin-bottom: 14px;
+        }
+
+        /* ── KPI grid ── */
+        .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+        .kpi-card {
+            background: var(--card); border-radius: 10px; padding: 18px 20px;
+            border: 1px solid var(--border); transition: box-shadow 0.15s;
+        }
+        .kpi-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+        .kpi-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .kpi-label { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-2); padding-top: 2px; }
+        .kpi-icon-wrap {
+            width: 34px; height: 34px; border-radius: 8px; background: var(--green-bg);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .kpi-icon-wrap svg { width: 16px; height: 16px; }
+        .kpi-icon-wrap.amber { background: var(--amber-bg); }
+        .kpi-icon-wrap.red   { background: var(--red-bg); }
+        .kpi-value { font-size: 2.1rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 5px; }
+        .kpi-sub   { font-size: 0.7rem; color: var(--text-3); }
+
+        /* ── Link externo ── */
+        .link-ext-card {
+            margin-top: 14px; background: var(--card);
+            border-radius: 10px; padding: 14px 20px; border: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between; gap: 16px;
+        }
+        .link-ext-info { display: flex; align-items: center; gap: 12px; }
+        .link-ext-icon {
+            width: 34px; height: 34px; border-radius: 8px; background: var(--green-bg);
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .link-ext-icon svg { width: 16px; height: 16px; }
+        .link-ext-lbl  { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3); }
+        .link-ext-nome { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-top: 1px; }
+        a.link-btn {
+            background: var(--green); color: white; padding: 8px 16px; border-radius: 7px;
+            text-decoration: none; font-weight: 500; font-size: 0.78rem;
+            transition: background 0.15s; white-space: nowrap;
+        }
+        a.link-btn:hover { background: var(--green-mid); }
+
+        /* ── Charts grid ── */
+        .charts-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .extras-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        /* ── SLA bar ── */
+        .sla-bar-bg { background: var(--red-bg); border-radius: 8px; height: 34px; overflow: hidden; }
+        .sla-bar-fill {
+            background: linear-gradient(90deg, var(--green), var(--green-mid));
+            height: 100%; border-radius: 8px;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 12px; color: white; font-weight: 600; font-size: 0.82rem;
+            transition: width 0.9s ease; min-width: 48px;
+        }
+        .sla-mini-grid { display: flex; gap: 10px; margin-top: 14px; }
+        .sla-mini-box { flex: 1; text-align: center; padding: 12px 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .sla-mini-box .val { font-size: 1.8rem; font-weight: 700; }
+        .sla-mini-box .lbl { font-size: 0.65rem; color: var(--text-2); margin-top: 3px; font-weight: 500; }
+        .sla-mini-box.ok  { background: var(--green-bg); border-color: #c0e4ce; }
+        .sla-mini-box.ok  .val { color: var(--green); }
+        .sla-mini-box.nok { background: var(--red-bg); border-color: #f5c6c2; }
+        .sla-mini-box.nok .val { color: var(--red); }
+        .sla-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.7rem; color: var(--text-3); }
+
+        /* ── Meta card ── */
+        .meta-card { background: var(--card); border-radius: 10px; padding: 22px 24px; border: 1px solid var(--border); }
+        .meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .meta-header h3 { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 0; }
+        .meta-percent { font-size: 2rem; font-weight: 700; color: var(--green); }
+        .meta-bar-bg { background: var(--green-bg); border-radius: 8px; height: 28px; overflow: hidden; }
+        .meta-bar-fill {
+            background: linear-gradient(90deg, var(--green), var(--green-mid));
+            height: 100%; border-radius: 8px;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 12px; color: white; font-weight: 600; font-size: 0.78rem;
+            transition: width 1s ease; min-width: 48px;
+        }
+        .meta-detail { display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.72rem; color: var(--text-2); }
+
+        /* ── Pace ── */
+        .pace-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+        .pace-lbl { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3); }
+        .pace-badge { padding: 3px 10px; border-radius: 20px; font-weight: 600; font-size: 0.72rem; white-space: nowrap; }
+        .pace-badge.verde   { background: var(--green-bg);  color: var(--green); }
+        .pace-badge.amarelo { background: var(--amber-bg);  color: var(--amber); }
+        .pace-badge.vermelho{ background: var(--red-bg);    color: var(--red); }
+        .pace-badge.cinza   { background: var(--bg);        color: var(--text-2); border: 1px solid var(--border); }
+        .pace-text { font-size: 0.72rem; color: var(--text-2); }
+
+        /* ── Meta positions ── */
+        .meta-pos-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+        .meta-pos-title { font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3); margin-bottom: 10px; }
+
+        /* ── Deslig ── */
+        .deslig-pct { font-size: 2.6rem; font-weight: 700; color: var(--amber); line-height: 1; }
+
+        /* ── Tempo médio ── */
+        .tempo-val  { font-size: 3.5rem; font-weight: 700; color: var(--text); line-height: 1; }
+        .tempo-unit { font-size: 1rem; color: var(--text-2); font-weight: 500; margin-left: 4px; }
+
+        /* ── Rank tables ── */
+        .rank-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+        .rank-table th {
+            text-align: left; padding: 6px 10px; border-bottom: 2px solid var(--border);
+            color: var(--text-3); font-weight: 600; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .rank-table td { padding: 9px 10px; border-bottom: 1px solid var(--bg); vertical-align: middle; color: var(--text); }
+        .rank-table tr:last-child td { border-bottom: none; }
+        .mini-bar { background: var(--green-bg); border-radius: 3px; height: 5px; margin-top: 5px; overflow: hidden; }
+        .mini-bar-fill { height: 100%; border-radius: 3px; background: var(--green-mid); }
+
+        /* ── Em construção ── */
+        .em-construcao-banner {
+            background: var(--amber-bg); border-bottom: 1px solid #f5d9a0;
+            padding: 8px 22px; margin: 0 -22px 14px;
+            font-size: 0.72rem; font-weight: 600; color: var(--amber);
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* ── Recusas ── */
+        .recusa-kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 14px; }
+        .recusa-kpi {
+            background: var(--card); border-radius: 10px; padding: 16px 18px;
+            border: 1px solid var(--border);
+        }
+        .recusa-kpi .rlbl { font-size: 0.63rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.7px; }
+        .recusa-kpi .rval { font-size: 1.7rem; font-weight: 700; color: var(--text); line-height: 1.2; margin: 4px 0 2px; }
+        .recusa-kpi .rsub { font-size: 0.68rem; color: var(--text-2); }
+
+        .recusa-detail-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-top: 8px; }
+        .recusa-detail-table th {
+            text-align: left; padding: 6px 10px; border-bottom: 2px solid var(--border);
+            color: var(--text-3); font-weight: 600; font-size: 0.63rem; text-transform: uppercase; letter-spacing: 0.6px;
+        }
+        .recusa-detail-table td { padding: 9px 10px; border-bottom: 1px solid var(--bg); vertical-align: middle; }
+        .recusa-detail-table tr:last-child td { border-bottom: none; }
+        .motivo-bar { background: var(--bg); border-radius: 3px; height: 5px; margin-top: 5px; overflow: hidden; }
+        .motivo-bar-fill { height: 100%; border-radius: 3px; }
+
+        /* ── Responsive ── */
+        @media (max-width: 960px) {
+            .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+            .charts-grid, .quality-grid, .extras-grid { grid-template-columns: 1fr; }
+            main { padding: 16px; }
+            header { padding: 0 16px; height: auto; flex-wrap: wrap; padding-top: 10px; padding-bottom: 10px; gap: 10px; }
+            .nav-period { flex-wrap: wrap; justify-content: flex-end; }
+        }
+    </style>
+</head>
+<body>
+
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║           DADOS DO DASHBOARD — EDITE AQUI PARA ATUALIZAR            ║
+╠══════════════════════════════════════════════════════════════════════╣
+║  Para cada mês, copie um bloco existente e altere os números.        ║
+║  Formato da chave: "YYYY-MM"  (ex: "2026-05" = Maio de 2026)        ║
+║                                                                      ║
+║  meta.posicoes       → detalhamento de vagas abertas por cargo       ║
+║  recrutadores[].fechadasDentroSLA → métrica do ranking               ║
+║  CONFIG.linkDashboardExterno → URL do outro dashboard                ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
+<script>
+const CONFIG = {
+    linkDashboardExterno: "#",
+    nomeDashboardExterno: "Dashboard Operacional"
+};
+
+const DADOS = {
+
+    "2026-03": {
+        vagas: { abertas: 10, fechadas: 6, congeladas: 2, canceladas: 1 },
+        candidaturas: { media: 18 },
+        sla: { dentro: 5, fora: 1 },
+        desligamentos: { total: 18, precoce: 1 },
+        meta: {
+            concluida: 6, total: 10,
+            posicoes: [
+                { posicao: "Dev Frontend",   vagasMeta: 2, contratados: 2 },
+                { posicao: "Analista de RH", vagasMeta: 3, contratados: 2 },
+                { posicao: "Coord. Ops",     vagasMeta: 2, contratados: 1 },
+                { posicao: "UX Designer",    vagasMeta: 3, contratados: 1 }
+            ]
+        },
+        tempoMedioFechamento: 22,
+        rankingVagas: [
+            { vaga: "Dev Frontend",   candidaturas: 42 },
+            { vaga: "Analista de RH", candidaturas: 35 },
+            { vaga: "Coord. Ops",     candidaturas: 18 },
+            { vaga: "UX Designer",    candidaturas: 13 }
+        ],
+        recrutadores: [
+            { nome: "Ana Lima",   fechadas: 3, fechadasDentroSLA: 2 },
+            { nome: "Bruno Melo", fechadas: 2, fechadasDentroSLA: 2 },
+            { nome: "Carol Dias", fechadas: 1, fechadasDentroSLA: 1 }
+        ],
+        recusas: {
+            abordados: 38,
+            motivos: [
+                { motivo: "Modelo PJ/CLT",           recusaram: 8  },
+                { motivo: "Modelo de trabalho",       recusaram: 6  },
+                { motivo: "Baixa remuneração",        recusaram: 10 },
+                { motivo: "Localização",              recusaram: 4  },
+                { motivo: "Proposta concorrente",     recusaram: 7  },
+                { motivo: "Benefícios insuficientes", recusaram: 5  }
+            ]
+        }
+    },
+
+    "2026-04": {
+        vagas: { abertas: 12, fechadas: 8, congeladas: 3, canceladas: 1 },
+        candidaturas: { media: 24 },
+        sla: { dentro: 6, fora: 2 },
+        desligamentos: { total: 20, precoce: 2 },
+        meta: {
+            concluida: 8, total: 12,
+            posicoes: [
+                { posicao: "Dev Backend",     vagasMeta: 3, contratados: 2 },
+                { posicao: "Dev Frontend",    vagasMeta: 2, contratados: 2 },
+                { posicao: "Product Manager", vagasMeta: 3, contratados: 2 },
+                { posicao: "Analista de RH",  vagasMeta: 2, contratados: 1 },
+                { posicao: "Coord. Ops",      vagasMeta: 2, contratados: 1 }
+            ]
+        },
+        tempoMedioFechamento: 19,
+        rankingVagas: [
+            { vaga: "Dev Backend",     candidaturas: 58 },
+            { vaga: "Dev Frontend",    candidaturas: 45 },
+            { vaga: "Product Manager", candidaturas: 37 },
+            { vaga: "Analista de RH",  candidaturas: 29 },
+            { vaga: "Coord. Ops",      candidaturas: 23 }
+        ],
+        recrutadores: [
+            { nome: "Ana Lima",   fechadas: 4, fechadasDentroSLA: 3 },
+            { nome: "Bruno Melo", fechadas: 3, fechadasDentroSLA: 2 },
+            { nome: "Carol Dias", fechadas: 1, fechadasDentroSLA: 1 }
+        ],
+        recusas: {
+            abordados: 50,
+            motivos: [
+                { motivo: "Modelo PJ/CLT",           recusaram: 12 },
+                { motivo: "Modelo de trabalho",       recusaram: 8  },
+                { motivo: "Baixa remuneração",        recusaram: 14 },
+                { motivo: "Localização",              recusaram: 5  },
+                { motivo: "Proposta concorrente",     recusaram: 11 },
+                { motivo: "Benefícios insuficientes", recusaram: 7  }
+            ]
+        }
+    }
+
+};
+</script>
+
+<!-- ══════════════════════════════ HEADER ══ -->
+<header>
+    <a class="logo" href="#">
+        <div class="logo-mark">rh</div>
+        <span class="logo-name">recrutamento</span>
+    </a>
+    <div class="nav-period">
+        <button onclick="navegarMes(-1)">&#8592; anterior</button>
+        <span id="labelMes"></span>
+        <button onclick="navegarMes(+1)">próximo &#8594;</button>
+        <span class="period-sep">|</span>
+        <div class="date-range-wrap">
+            <label>de <input type="date" id="inputDateStart" onchange="onDateChange()"></label>
+            <label>até <input type="date" id="inputDateEnd" onchange="onDateChange()"></label>
+            <button class="btn-reset-periodo" id="btnResetPeriod" onclick="resetPeriod()">&#10005; limpar</button>
+        </div>
+    </div>
+</header>
+
+<main>
+
+    <div class="page-header">
+        <h1 class="page-title">dashboard de recrutamento</h1>
+        <p class="page-subtitle">indicadores de pessoas — <span id="labelPeriodoSub">—</span></p>
+    </div>
+
+    <!-- ── VISÃO GERAL ── -->
+    <div class="section-title">VISÃO GERAL <span class="st-sub">— vagas no período</span></div>
+    <div class="kpi-grid">
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-label">Vagas em Aberto</div>
+                <div class="kpi-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="kpi-value" id="kpi-abertas">—</div>
+            <div class="kpi-sub">posições ativas</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-label">Vagas Fechadas</div>
+                <div class="kpi-icon-wrap">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="kpi-value" id="kpi-fechadas">—</div>
+            <div class="kpi-sub">concluídas no período</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-label">Vagas Congeladas</div>
+                <div class="kpi-icon-wrap amber">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="kpi-value" id="kpi-congeladas">—</div>
+            <div class="kpi-sub">temporariamente pausadas</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-top">
+                <div class="kpi-label">Vagas Canceladas</div>
+                <div class="kpi-icon-wrap red">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#dc4a3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="kpi-value" id="kpi-canceladas">—</div>
+            <div class="kpi-sub">encerradas sem preenchimento</div>
+        </div>
+
+    </div>
+
+    <!-- Acesso rápido -->
+    <div class="link-ext-card">
+        <div class="link-ext-info">
+            <div class="link-ext-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+            </div>
+            <div>
+                <div class="link-ext-lbl">Acesso Rápido</div>
+                <div class="link-ext-nome" id="linkNome">—</div>
+            </div>
+        </div>
+        <a class="link-btn" id="linkBtn" href="#" target="_blank">abrir dashboard &#8594;</a>
+    </div>
+
+    <!-- ── PERFORMANCE ── -->
+    <div class="section-title">PERFORMANCE <span class="st-sub">— candidaturas e SLA</span></div>
+    <div class="charts-grid">
+
+        <div class="card">
+            <h3>Média de Candidaturas por Vaga</h3>
+            <canvas id="chartCandidaturas" height="200"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>SLA — vagas dentro do prazo</h3>
+            <div style="margin-top:6px;">
+                <div class="sla-bar-bg">
+                    <div class="sla-bar-fill" id="slaFill">0%</div>
+                </div>
+                <div class="sla-labels">
+                    <span id="slaInfo">—</span>
+                    <span id="slaTotal">—</span>
+                </div>
+                <div class="sla-mini-grid">
+                    <div class="sla-mini-box ok">
+                        <div class="val" id="slaDentro">—</div>
+                        <div class="lbl">dentro do SLA</div>
+                    </div>
+                    <div class="sla-mini-box nok">
+                        <div class="val" id="slaFora">—</div>
+                        <div class="lbl">fora do SLA</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── QUALIDADE ── -->
+    <div class="section-title">QUALIDADE <span class="st-sub">— desligamentos e tempo de fechamento</span></div>
+    <div class="quality-grid">
+
+        <div class="card">
+            <h3>Desligamento Precoce <span style="font-weight:400;color:var(--text-2)">(até 3 meses)</span></h3>
+            <div style="display:flex; align-items:center; gap:20px; margin-top:4px;">
+                <div style="flex-shrink:0; text-align:center;">
+                    <div class="deslig-pct" id="desligPct">—</div>
+                    <div style="font-size:0.65rem;color:var(--text-3);margin-top:3px;">% desligamentos</div>
+                    <div style="font-size:0.7rem;color:var(--text-2);margin-top:5px;" id="desligDesc">—</div>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <canvas id="chartDeslig" height="130"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
+            <h3>Tempo Médio de Fechamento</h3>
+            <div style="display:flex;align-items:baseline;gap:6px;margin-top:14px;">
+                <span class="tempo-val" id="tempoMedio">—</span>
+                <span class="tempo-unit">dias</span>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-3);margin-top:8px;">desde abertura até fechamento da vaga</div>
+        </div>
+
+    </div>
+
+    <!-- ── META DO MÊS ── -->
+    <div class="section-title">META DO MÊS <span class="st-sub">— contratações vs. objetivo</span></div>
+    <div class="meta-card">
+
+        <div class="meta-header">
+            <h3>Vagas concluídas vs. meta</h3>
+            <div class="meta-percent" id="metaPct">—</div>
+        </div>
+        <div class="meta-bar-bg">
+            <div class="meta-bar-fill" id="metaFill">—</div>
+        </div>
+        <div class="meta-detail">
+            <span id="metaDetalhe">—</span>
+            <span id="metaFaltam">—</span>
+        </div>
+
+        <div class="pace-row">
+            <span class="pace-lbl">Pace total</span>
+            <span class="pace-badge cinza" id="paceBadge">—</span>
+            <span class="pace-text" id="paceText">—</span>
+        </div>
+
+        <div class="meta-pos-section">
+            <div class="meta-pos-title">contratações por posição — contratados vs. faltam</div>
+            <canvas id="chartMetaPosicoes" style="display:none;"></canvas>
+            <div id="metaPosPlaceholder" style="display:none;text-align:center;color:var(--text-3);font-size:0.78rem;padding:18px 0;">
+                Adicione <code>meta.posicoes</code> nos DADOS para visualizar o gráfico por posição.
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ── DETALHAMENTO ── -->
+    <div class="section-title">DETALHAMENTO <span class="st-sub">— ranking e recrutadores</span></div>
+    <div class="extras-grid">
+
+        <div class="card">
+            <h3>Ranking — vagas com mais candidaturas</h3>
+            <table class="rank-table" id="tblRanking"></table>
+        </div>
+
+        <div class="card" style="overflow:hidden; padding-top:0;">
+            <div class="em-construcao-banner">Em construção — dados em processo de validação</div>
+            <h3 style="margin-top:0;">Top Recrutadores
+                <span style="font-size:0.68rem;color:var(--text-3);font-weight:400;margin-left:5px;">vagas fechadas dentro do SLA</span>
+            </h3>
+            <table class="rank-table" id="tblRecrutadores"></table>
+        </div>
+
+    </div>
+
+    <!-- ── MOTIVOS DE RECUSA ── -->
+    <div class="section-title">MOTIVOS DE RECUSA <span class="st-sub">— análise de declínios</span></div>
+
+    <div class="recusa-kpi-grid">
+        <div class="recusa-kpi">
+            <div class="rlbl">Candidatos Abordados</div>
+            <div class="rval" id="recAbordados">—</div>
+            <div class="rsub">no período</div>
+        </div>
+        <div class="recusa-kpi">
+            <div class="rlbl">Total de Recusas</div>
+            <div class="rval" id="recTotal">—</div>
+            <div class="rsub" id="recTotalSub">—</div>
+        </div>
+        <div class="recusa-kpi">
+            <div class="rlbl">Motivo Principal</div>
+            <div class="rval" style="font-size:1rem;padding-top:4px;" id="recMotivoPrincipal">—</div>
+            <div class="rsub" id="recMotivoPrincipalSub">—</div>
+        </div>
+    </div>
+
+    <div class="charts-grid">
+        <div class="card">
+            <h3>Taxa de recusa por motivo — mês atual (%)</h3>
+            <canvas id="chartRecusaBar" height="260"></canvas>
+        </div>
+        <div class="card">
+            <h3>Tendência histórica por motivo (%)</h3>
+            <canvas id="chartRecusaLine" height="260"></canvas>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+        <h3>Detalhamento completo de recusas</h3>
+        <table class="recusa-detail-table" id="tblRecusas"></table>
+    </div>
+
+    <div style="height:48px;"></div>
+</main>
+
+<!-- ══════════════════════════════ LÓGICA ══ -->
+<script>
+const MESES_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const mesesDisponiveis = Object.keys(DADOS).sort();
+
+let mesAtivo = (() => {
+    const hoje = new Date().toISOString().slice(0, 7);
+    return DADOS[hoje] ? hoje : mesesDisponiveis[mesesDisponiveis.length - 1];
+})();
+
+let _chartCand = null, _chartDesl = null, _chartRecBar = null, _chartRecLine = null, _chartMetaPos = null;
+
+// Paleta harmônica para motivos
+const CORES_MOTIVOS = ["#2d7a50","#5b8db8","#c4704a","#8d6bbf","#c4964a","#4a9898"];
+
+function labelMes(chave) {
+    const [ano, mes] = chave.split("-");
+    return MESES_PT[parseInt(mes) - 1] + "/" + ano.slice(2);
+}
+
+function labelMesLong(chave) {
+    const [ano, mes] = chave.split("-");
+    return MESES_PT[parseInt(mes) - 1] + " " + ano;
+}
+
+// ─── Date helpers ──────────────────────────────────────────────────
+function getMesInfo() {
+    const [ano, mes] = mesAtivo.split("-").map(Number);
+    const firstDay = new Date(ano, mes - 1, 1);
+    const lastDay  = new Date(ano, mes, 0);
+    const hoje     = new Date(); hoje.setHours(0,0,0,0);
+    const isMesAtual = hoje.getFullYear() === ano && hoje.getMonth() === mes - 1;
+    return { ano, mes, firstDay, lastDay, hoje, isMesAtual };
+}
+
+function fmt(d) { return d.toISOString().slice(0, 10); }
+
+function getDateRange() {
+    const { firstDay, lastDay, hoje, isMesAtual } = getMesInfo();
+    const sv = document.getElementById("inputDateStart").value;
+    const ev = document.getElementById("inputDateEnd").value;
+    const start = sv ? new Date(sv + "T00:00:00") : firstDay;
+    const end   = ev ? new Date(ev + "T00:00:00") : (isMesAtual ? hoje : lastDay);
+    return { start, end };
+}
+
+function updateDateInputs() {
+    const { firstDay, lastDay, hoje, isMesAtual } = getMesInfo();
+    const defaultEnd = isMesAtual ? hoje : lastDay;
+    const si = document.getElementById("inputDateStart");
+    const ei = document.getElementById("inputDateEnd");
+    si.min = fmt(firstDay); si.max = fmt(lastDay); si.value = fmt(firstDay);
+    ei.min = fmt(firstDay); ei.max = fmt(lastDay); ei.value = fmt(defaultEnd);
+    document.getElementById("btnResetPeriod").style.display = "none";
+}
+
+function onDateChange() {
+    const { firstDay, lastDay, hoje, isMesAtual } = getMesInfo();
+    const si = document.getElementById("inputDateStart");
+    const ei = document.getElementById("inputDateEnd");
+    if (si.value && ei.value && ei.value < si.value) ei.value = si.value;
+    const defaultEnd = isMesAtual ? hoje : lastDay;
+    const isDefault  = si.value === fmt(firstDay) && ei.value === fmt(defaultEnd);
+    document.getElementById("btnResetPeriod").style.display = isDefault ? "none" : "inline-block";
+    renderizar();
+}
+
+function resetPeriod() { updateDateInputs(); renderizar(); }
+
+// ─── Navegação ─────────────────────────────────────────────────────
+function navegarMes(delta) {
+    const idx = mesesDisponiveis.indexOf(mesAtivo);
+    const n   = idx + delta;
+    if (n < 0) { alert("Não há dados para o mês anterior."); return; }
+    if (n >= mesesDisponiveis.length) { alert("Este é o mês mais recente disponível."); return; }
+    mesAtivo = mesesDisponiveis[n];
+    updateDateInputs();
+    renderizar();
+}
+
+// ─── Pace ──────────────────────────────────────────────────────────
+function calcularPace(concluida, total) {
+    const { firstDay, lastDay, hoje, isMesAtual } = getMesInfo();
+    if (!isMesAtual) return { tipo: "cinza", label: "mês encerrado", texto: "" };
+    const { start, end } = getDateRange();
+    const diasPassados  = Math.max(1, Math.round((end  - start)      / 86400000) + 1);
+    const diasTotais    = Math.max(1, Math.round((lastDay - firstDay) / 86400000) + 1);
+    const diasRestantes = Math.max(0, lastDay.getDate() - hoje.getDate());
+    const projetado     = Math.round((concluida / diasPassados) * diasTotais);
+    if (projetado >= total)                    return { tipo: "verde",   label: "no ritmo",        texto: `projeção: ${projetado} vagas · ${diasRestantes} dia(s) restante(s)` };
+    if (projetado >= Math.round(total * 0.8))  return { tipo: "amarelo", label: "atenção",          texto: `projeção: ${projetado} vagas · ${diasRestantes} dia(s) restante(s)` };
+    return                                            { tipo: "vermelho", label: "abaixo do ritmo",  texto: `projeção: ${projetado} vagas · ${diasRestantes} dia(s) restante(s)` };
+}
+
+// ─── Chart defaults ────────────────────────────────────────────────
+Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+Chart.defaults.font.size   = 11;
+Chart.defaults.color       = "#9eabbe";
+
+// ─── Render ────────────────────────────────────────────────────────
+function renderizar() {
+    const d = DADOS[mesAtivo];
+    if (!d) return;
+
+    const { start, end } = getDateRange();
+    const fmtBR = dt => dt.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+    const { isMesAtual } = getMesInfo();
+
+    document.getElementById("labelMes").textContent       = labelMesLong(mesAtivo);
+    document.getElementById("labelPeriodoSub").textContent = `${fmtBR(start)} a ${fmtBR(end)} de ${mesAtivo.split("-")[0]}`;
+
+    // Link externo
+    document.getElementById("linkNome").textContent = CONFIG.nomeDashboardExterno;
+    document.getElementById("linkBtn").href         = CONFIG.linkDashboardExterno;
+
+    // KPIs
+    document.getElementById("kpi-abertas").textContent    = d.vagas.abertas;
+    document.getElementById("kpi-fechadas").textContent   = d.vagas.fechadas;
+    document.getElementById("kpi-congeladas").textContent = d.vagas.congeladas;
+    document.getElementById("kpi-canceladas").textContent = d.vagas.canceladas;
+
+    // Candidaturas — linha de tendência por todos os meses
+    const lblsCand = mesesDisponiveis.map(labelMes);
+    const valsCand = mesesDisponiveis.map(mes => DADOS[mes] ? DADOS[mes].candidaturas.media : null);
+    if (_chartCand) _chartCand.destroy();
+    _chartCand = new Chart(document.getElementById("chartCandidaturas").getContext("2d"), {
+        type: "line",
+        data: { labels: lblsCand, datasets: [{ label: "Média candidaturas/vaga", data: valsCand, borderColor: "#1a5c38", backgroundColor: "transparent", borderWidth: 2, pointRadius: 3, pointBackgroundColor: "#1a5c38", pointBorderColor: "#fff", pointBorderWidth: 1.5, tension: 0.3, spanGaps: true, fill: false }] },
+        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: "#eef1f6" }, border: { display: false }, ticks: { color: "#9eabbe" } }, x: { grid: { display: false }, border: { display: false }, ticks: { color: "#9eabbe" } } } }
+    });
+
+    // SLA
+    const slaTotal = d.sla.dentro + d.sla.fora;
+    const slaPct   = slaTotal > 0 ? Math.round(d.sla.dentro / slaTotal * 100) : 0;
+    document.getElementById("slaFill").style.width   = slaPct + "%";
+    document.getElementById("slaFill").textContent   = slaPct + "%";
+    document.getElementById("slaInfo").textContent   = `${d.sla.dentro} dentro · ${d.sla.fora} fora`;
+    document.getElementById("slaTotal").textContent  = `${slaTotal} vagas avaliadas`;
+    document.getElementById("slaDentro").textContent = d.sla.dentro;
+    document.getElementById("slaFora").textContent   = d.sla.fora;
+
+    // Desligamentos
+    const pctDesl = d.desligamentos.total > 0 ? Math.round(d.desligamentos.precoce / d.desligamentos.total * 100) : 0;
+    document.getElementById("desligPct").textContent  = pctDesl + "%";
+    document.getElementById("desligDesc").textContent = `${d.desligamentos.precoce} de ${d.desligamentos.total} contratações`;
+    if (_chartDesl) _chartDesl.destroy();
+    _chartDesl = new Chart(document.getElementById("chartDeslig").getContext("2d"), {
+        type: "doughnut",
+        data: { labels: ["Deslig. precoce","Retidos"], datasets: [{ data: [d.desligamentos.precoce, d.desligamentos.total - d.desligamentos.precoce], backgroundColor: ["#d97706","#eaf5ef"], borderWidth: 0 }] },
+        options: { plugins: { legend: { position: "bottom", labels: { font: { size: 11 }, padding: 10, boxWidth: 12 } } }, cutout: "62%" }
+    });
+
+    // Tempo médio
+    document.getElementById("tempoMedio").textContent = d.tempoMedioFechamento != null ? d.tempoMedioFechamento : "—";
+
+    // Meta
+    const metaPct = Math.round(d.meta.concluida / d.meta.total * 100);
+    document.getElementById("metaPct").textContent     = metaPct + "%";
+    document.getElementById("metaFill").style.width    = metaPct + "%";
+    document.getElementById("metaFill").textContent    = metaPct + "%";
+    document.getElementById("metaDetalhe").textContent = `${d.meta.concluida} vagas concluídas de ${d.meta.total}`;
+    const faltam = d.meta.total - d.meta.concluida;
+    document.getElementById("metaFaltam").textContent  = faltam > 0 ? `faltam ${faltam} para a meta` : "meta atingida";
+
+    // Pace
+    const pace = calcularPace(d.meta.concluida, d.meta.total);
+    const pb = document.getElementById("paceBadge");
+    pb.className = "pace-badge " + pace.tipo;
+    pb.textContent = pace.label;
+    document.getElementById("paceText").textContent = pace.texto;
+
+    // Gráfico por posição
+    const canvasPos   = document.getElementById("chartMetaPosicoes");
+    const placeholder = document.getElementById("metaPosPlaceholder");
+    if (d.meta.posicoes && d.meta.posicoes.length > 0) {
+        placeholder.style.display = "none";
+        canvasPos.style.display   = "block";
+        canvasPos.height = d.meta.posicoes.length * 30 + 20;
+        const labelsPos   = d.meta.posicoes.map(p => p.posicao);
+        const contratados = d.meta.posicoes.map(p => p.contratados);
+        const faltamPos   = d.meta.posicoes.map(p => Math.max(0, p.vagasMeta - p.contratados));
+        const posRef      = d.meta.posicoes;
+        if (_chartMetaPos) _chartMetaPos.destroy();
+        _chartMetaPos = new Chart(canvasPos.getContext("2d"), {
+            type: "bar",
+            data: { labels: labelsPos, datasets: [
+                { label: "Contratados", data: contratados, backgroundColor: "#1a5c38",   borderWidth: 0, borderRadius: 2, maxBarThickness: 12 },
+                { label: "Faltam",      data: faltamPos,   backgroundColor: "#eaf0f5",   borderWidth: 0, borderRadius: 2, maxBarThickness: 12 }
+            ]},
+            options: {
+                indexAxis: "y",
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { afterBody(items) { const i = items[0].dataIndex; return `meta: ${posRef[i].vagasMeta} vaga(s)`; } } }
+                },
+                scales: {
+                    x: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 }, color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
+                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 }, color: "#6b7c93" }, border: { display: false } }
+                },
+                layout: { padding: 0 }
+            }
+        });
+    } else {
+        canvasPos.style.display   = "none";
+        placeholder.style.display = "block";
+        if (_chartMetaPos) { _chartMetaPos.destroy(); _chartMetaPos = null; }
+    }
+
+    // Ranking vagas
+    const maxCand = Math.max(...d.rankingVagas.map(v => v.candidaturas));
+    document.getElementById("tblRanking").innerHTML =
+        `<thead><tr><th>#</th><th>Vaga</th><th style="text-align:right">Candidaturas</th></tr></thead><tbody>` +
+        d.rankingVagas.map((v, i) =>
+            `<tr>
+               <td style="color:var(--text-3);font-weight:600;width:20px">${i+1}</td>
+               <td style="color:var(--text)">${v.vaga}<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(v.candidaturas/maxCand*100)}%"></div></div></td>
+               <td style="text-align:right;font-weight:700;color:var(--green-mid)">${v.candidaturas}</td>
+             </tr>`).join("") + `</tbody>`;
+
+    // Recrutadores
+    const recsSLA = d.recrutadores
+        .map(r => ({ ...r, metrica: r.fechadasDentroSLA != null ? r.fechadasDentroSLA : r.fechadas }))
+        .sort((a, b) => b.metrica - a.metrica);
+    const maxSLA = Math.max(...recsSLA.map(r => r.metrica), 1);
+    document.getElementById("tblRecrutadores").innerHTML =
+        `<thead><tr><th>#</th><th>Recrutador(a)</th><th style="text-align:right">Vagas (SLA)</th></tr></thead><tbody>` +
+        recsSLA.map((r, i) =>
+            `<tr>
+               <td style="color:var(--text-3);font-weight:600;width:20px">${i+1}</td>
+               <td style="color:var(--text)">${r.nome}<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(r.metrica/maxSLA*100)}%"></div></div></td>
+               <td style="text-align:right;font-weight:700;color:var(--green-mid)">${r.metrica}</td>
+             </tr>`).join("") + `</tbody>`;
+
+    // Motivos de recusa
+    if (d.recusas) {
+        const rec          = d.recusas;
+        const totalRecusas = rec.motivos.reduce((s, m) => s + m.recusaram, 0);
+        const taxaGeral    = rec.abordados > 0 ? Math.round(totalRecusas / rec.abordados * 100) : 0;
+        const principal    = rec.motivos.reduce((a, b) => a.recusaram > b.recusaram ? a : b);
+
+        document.getElementById("recAbordados").textContent          = rec.abordados;
+        document.getElementById("recTotal").textContent              = totalRecusas;
+        document.getElementById("recTotalSub").textContent           = `${taxaGeral}% dos abordados recusaram`;
+        document.getElementById("recMotivoPrincipal").textContent    = principal.motivo;
+        document.getElementById("recMotivoPrincipalSub").textContent =
+            `${principal.recusaram} recusas (${Math.round(principal.recusaram / rec.abordados * 100)}%)`;
+
+        const labels = rec.motivos.map(m => m.motivo);
+        const pcts   = rec.motivos.map(m => +(m.recusaram / rec.abordados * 100).toFixed(1));
+        const cores  = rec.motivos.map((_, i) => CORES_MOTIVOS[i % CORES_MOTIVOS.length]);
+
+        if (_chartRecBar) _chartRecBar.destroy();
+        _chartRecBar = new Chart(document.getElementById("chartRecusaBar").getContext("2d"), {
+            type: "bar",
+            data: { labels, datasets: [{ data: pcts, backgroundColor: cores, borderWidth: 0, borderRadius: 2 }] },
+            options: {
+                indexAxis: "y",
+                plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}% dos abordados` } } },
+                scales: {
+                    x: { beginAtZero: true, max: 100, ticks: { callback: v => v+"%", color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
+                    y: { grid: { display: false }, border: { display: false }, ticks: { color: "#6b7c93" } }
+                }
+            }
+        });
+
+        const motivosNomes = rec.motivos.map(m => m.motivo);
+        const labelsLine   = mesesDisponiveis.map(labelMes);
+        const datasets = motivosNomes.map((nome, mi) => ({
+            label: nome,
+            data: mesesDisponiveis.map(mes => {
+                const dd = DADOS[mes];
+                if (!dd || !dd.recusas) return null;
+                const mot = dd.recusas.motivos.find(m => m.motivo === nome);
+                return mot ? +(mot.recusaram / dd.recusas.abordados * 100).toFixed(1) : null;
+            }),
+            borderColor: CORES_MOTIVOS[mi % CORES_MOTIVOS.length],
+            backgroundColor: "transparent",
+            tension: 0.3, pointRadius: 3, pointHoverRadius: 5,
+            pointBackgroundColor: CORES_MOTIVOS[mi % CORES_MOTIVOS.length],
+            pointBorderColor: "#fff", pointBorderWidth: 1.5,
+            fill: false, spanGaps: true, borderWidth: 2
+        }));
+
+        if (_chartRecLine) _chartRecLine.destroy();
+        _chartRecLine = new Chart(document.getElementById("chartRecusaLine").getContext("2d"), {
+            type: "line",
+            data: { labels: labelsLine, datasets },
+            options: {
+                plugins: { legend: { position: "bottom", labels: { font: { size: 11 }, padding: 10, boxWidth: 12 } }, tooltip: { callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } } },
+                scales: {
+                    y: { beginAtZero: true, max: 100, ticks: { callback: v => v+"%", color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
+                    x: { grid: { display: false }, border: { display: false }, ticks: { color: "#9eabbe" } }
+                }
+            }
+        });
+
+        const maxRec = Math.max(...rec.motivos.map(m => m.recusaram));
+        document.getElementById("tblRecusas").innerHTML =
+            `<thead><tr><th>Motivo</th><th style="text-align:center">Recusas</th><th style="text-align:center">% abordados</th><th style="text-align:center">% recusas</th><th style="min-width:100px">Proporção</th></tr></thead><tbody>` +
+            rec.motivos.slice().sort((a,b) => b.recusaram - a.recusaram).map(m => {
+                const pctAbord = +(m.recusaram / rec.abordados * 100).toFixed(1);
+                const pctRec   = totalRecusas > 0 ? +(m.recusaram / totalRecusas * 100).toFixed(1) : 0;
+                const cor      = CORES_MOTIVOS[rec.motivos.indexOf(m) % CORES_MOTIVOS.length];
+                return `<tr>
+                    <td style="color:var(--text);font-weight:500">${m.motivo}</td>
+                    <td style="text-align:center;font-weight:700;color:${cor}">${m.recusaram}</td>
+                    <td style="text-align:center;color:var(--text-2)">${pctAbord}%</td>
+                    <td style="text-align:center;color:var(--text-2)">${pctRec}%</td>
+                    <td><div class="motivo-bar"><div class="motivo-bar-fill" style="width:${Math.round(m.recusaram/maxRec*100)}%;background:${cor}"></div></div></td>
+                  </tr>`;
+            }).join("") + `</tbody>`;
+    }
+}
+
+// ─── Init ──────────────────────────────────────────────────────────
+updateDateInputs();
+renderizar();
+</script>
+</body>
+</html>
