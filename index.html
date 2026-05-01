@@ -127,27 +127,87 @@
         .kpi-value { font-size: 2.1rem; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 5px; }
         .kpi-sub   { font-size: 0.7rem; color: var(--text-3); }
 
-        /* ── Link externo ── */
-        .link-ext-card {
-            margin-top: 14px; background: var(--card);
-            border-radius: 10px; padding: 14px 20px; border: 1px solid var(--border);
-            display: flex; align-items: center; justify-content: space-between; gap: 16px;
-        }
-        .link-ext-info { display: flex; align-items: center; gap: 12px; }
-        .link-ext-icon {
-            width: 34px; height: 34px; border-radius: 8px; background: var(--green-bg);
-            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
-        .link-ext-icon svg { width: 16px; height: 16px; }
-        .link-ext-lbl  { font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text-3); }
-        .link-ext-nome { font-size: 0.875rem; font-weight: 600; color: var(--text); margin-top: 1px; }
-        a.link-btn {
-            background: var(--green); color: white; padding: 8px 16px; border-radius: 7px;
-            text-decoration: none; font-weight: 500; font-size: 0.78rem;
-            transition: background 0.15s; white-space: nowrap;
-        }
-        a.link-btn:hover { background: var(--green-mid); }
 
+
+        
+        /* ── Seção status vagas ── */
+        .vagas-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+        .vagas-table thead th { padding:8px 12px; font-size:0.63rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-3); border-bottom:1px solid var(--border); text-align:left; white-space:nowrap; }
+        .vagas-table tbody tr { cursor:pointer; transition:background 0.12s; }
+        .vagas-table tbody tr:hover td { background:var(--green-bg); }
+        .vagas-table tbody td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+        .vagas-table tbody tr:last-child td { border-bottom:none; }
+        .vaga-nome { font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px; }
+        .vaga-rec  { font-size:0.72rem; color:var(--text-3); margin-top:2px; }
+        .vaga-prog { display:flex; align-items:center; gap:6px; }
+        .vaga-prog-bar { width:60px; height:6px; background:var(--border); border-radius:3px; overflow:hidden; }
+        .vaga-prog-fill { height:100%; background:var(--green); border-radius:3px; }
+        .vaga-prog-lbl { font-size:0.72rem; font-weight:700; color:var(--text); white-space:nowrap; }
+        .sla-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:4px; }
+        .sla-dot.ok  { background:#1a5c38; }
+        .sla-dot.warn{ background:#d97706; }
+        .sla-dot.bad { background:#dc4a3d; }
+        .status-pill { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:12px; font-size:0.65rem; font-weight:700; white-space:nowrap; }
+        .status-pill.aberta    { background:var(--green-bg);  color:var(--green); }
+        .status-pill.fechada   { background:#f1f5f9;          color:var(--text-3); }
+        .status-pill.congelada { background:var(--amber-bg);  color:var(--amber); }
+        .status-pill.cancelada { background:var(--red-bg);    color:var(--red); }
+        .arrow-btn { color:var(--green); font-size:0.85rem; font-weight:700; }
+        /* ── KPI clicável ── */
+        .kpi-card { cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+        .kpi-card:hover { border-color: var(--green); box-shadow: 0 4px 16px rgba(26,92,56,0.10); }
+
+        /* ── Meta barra colorida ── */
+        .meta-bar-fill.verde    { background: #1a5c38; }
+        .meta-bar-fill.amarelo  { background: #d97706; }
+        .meta-bar-fill.vermelho { background: #dc4a3d; }
+
+        /* ── Tempo médio por vaga ── */
+        .tempo-vaga-table { width:100%; border-collapse:collapse; font-size:0.78rem; margin-top:10px; }
+        .tempo-vaga-table td { padding: 5px 0; vertical-align: middle; }
+        .tempo-vaga-table td:last-child { text-align:right; font-weight:700; white-space:nowrap; }
+        .tempo-vaga-bar-wrap { width:100%; height:6px; background:var(--green-bg); border-radius:3px; margin-top:3px; }
+        .tempo-vaga-bar-fill { height:6px; border-radius:3px; }
+
+        /* ── Funil de etapas ── */
+        .funil-row { display:flex; align-items:center; gap:10px; margin-bottom:6px; font-size:0.78rem; }
+        .funil-label { width:110px; flex-shrink:0; color:var(--text-2); }
+        .funil-bar-wrap { flex:1; height:18px; background:var(--green-bg); border-radius:4px; overflow:hidden; }
+        .funil-bar-fill { height:100%; background:var(--green); border-radius:4px; transition:width 0.4s; }
+        .funil-val { width:36px; text-align:right; font-weight:700; color:var(--text); flex-shrink:0; }
+        .funil-pct { width:42px; text-align:right; font-size:0.7rem; color:var(--text-3); flex-shrink:0; }
+        /* Pills de vaga no funil */
+        .funil-pill { padding:3px 10px; border-radius:20px; font-size:0.68rem; font-weight:600; cursor:pointer; border:1px solid var(--border); background:#fff; color:var(--text-2); transition:all 0.15s; white-space:nowrap; }
+        .funil-pill:hover, .funil-pill.ativo { background:var(--green); color:#fff; border-color:var(--green); }
+        .funil-pill-geral { background:var(--green-bg); color:var(--green); border-color:var(--green); }
+        .funil-pill-geral:hover { background:var(--green); color:#fff; }
+        /* Redesign etapa maior reprovação */
+        .reprova-card { position:relative; }
+        .reprova-tag { display:inline-block; font-size:0.6rem; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--red); background:var(--red-bg); padding:2px 8px; border-radius:20px; }
+        .reprova-nome { font-size:1.45rem; font-weight:800; color:var(--text); margin-top:8px; line-height:1.15; }
+        .reprova-sub { font-size:0.72rem; color:var(--text-2); margin-top:5px; }
+        .reprova-vis-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+        .reprova-vis-label { font-size:0.65rem; color:var(--text-3); width:82px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .reprova-vis-bar { flex:1; height:7px; background:var(--border); border-radius:4px; overflow:hidden; }
+        .reprova-vis-fill { height:100%; border-radius:4px; transition:width 0.4s; }
+        .reprova-vis-num { font-size:0.68rem; font-weight:700; width:28px; text-align:right; flex-shrink:0; }
+
+        /* ── Modal ── */
+        .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1000; align-items:center; justify-content:center; }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:#fff; border-radius:14px; padding:28px; width:min(600px,92vw); max-height:80vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.18); }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; }
+        .modal-title { font-size:1rem; font-weight:700; color:var(--text); }
+        .modal-close { width:28px; height:28px; border:none; background:var(--bg); border-radius:6px; cursor:pointer; font-size:1.1rem; color:var(--text-2); display:flex; align-items:center; justify-content:center; }
+        .modal-close:hover { background:var(--border); }
+        .modal-table { width:100%; border-collapse:collapse; font-size:0.8rem; }
+        .modal-table th { text-align:left; padding:6px 10px; font-size:0.63rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-3); border-bottom:1px solid var(--border); }
+        .modal-table td { padding:8px 10px; border-bottom:1px solid var(--border); color:var(--text); }
+        .modal-table tr:last-child td { border-bottom:none; }
+        .modal-tag { display:inline-block; padding:2px 8px; border-radius:12px; font-size:0.65rem; font-weight:600; }
+        .modal-tag.verde   { background:var(--green-bg); color:var(--green); }
+        .modal-tag.amarelo { background:#fef3e2; color:#d97706; }
+        .modal-tag.vermelho { background:#fef0ef; color:#dc4a3d; }
         /* ── Charts grid ── */
         .charts-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         .quality-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
@@ -171,12 +231,23 @@
         .sla-mini-box.nok { background: var(--red-bg); border-color: #f5c6c2; }
         .sla-mini-box.nok .val { color: var(--red); }
         .sla-labels { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.7rem; color: var(--text-3); }
+        .sla-hero-row { display:flex; align-items:center; gap:14px; margin-top:8px; }
+        .sla-hero-pct { font-size:2.8rem; font-weight:800; color:var(--green); line-height:1; }
+        .sla-hero-sub { display:flex; flex-direction:column; gap:3px; font-size:0.72rem; color:var(--text-2); }
+        .sla-mini-box.neutral { background:#f5f7fa; border-color:var(--border); }
+        .sla-mini-box.neutral .val { color:var(--text); }
+        .sla-vaga-item { display:flex; align-items:center; gap:8px; padding:5px 0; border-top:1px solid var(--border); font-size:0.73rem; }
+        .sla-vaga-nome { color:var(--text); font-weight:500; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .sla-vaga-dias { color:var(--text-3); font-size:0.67rem; white-space:nowrap; }
 
         /* ── Meta card ── */
         .meta-card { background: var(--card); border-radius: 10px; padding: 22px 24px; border: 1px solid var(--border); }
         .meta-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         .meta-header h3 { font-size: 0.8rem; font-weight: 600; color: var(--text); margin-bottom: 0; }
         .meta-percent { font-size: 2rem; font-weight: 700; color: var(--green); }
+        .meta-percent.vermelho { color: #dc4a3d; }
+        .meta-percent.amarelo  { color: #d97706; }
+        .meta-percent.cinza    { color: var(--text-2); }
         .meta-bar-bg { background: var(--green-bg); border-radius: 8px; height: 28px; overflow: hidden; }
         .meta-bar-fill {
             background: linear-gradient(90deg, var(--green), var(--green-mid));
@@ -196,6 +267,17 @@
         .pace-badge.vermelho{ background: var(--red-bg);    color: var(--red); }
         .pace-badge.cinza   { background: var(--bg);        color: var(--text-2); border: 1px solid var(--border); }
         .pace-text { font-size: 0.72rem; color: var(--text-2); }
+        /* ── Pace previsão card ── */
+        .pace-prev-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:10px; }
+        .pace-prev-stat { text-align:center; padding:12px 8px; background:var(--bg); border-radius:8px; }
+        .pace-prev-val  { font-size:1.6rem; font-weight:800; color:var(--text); line-height:1.1; }
+        .pace-prev-lbl  { font-size:0.62rem; color:var(--text-3); margin-top:4px; line-height:1.3; }
+        .pace-prev-box  { background:var(--bg); border-radius:8px; padding:12px 14px; margin-top:12px; }
+        .pace-prev-box-title { font-size:0.72rem; color:var(--text-2); font-weight:600; margin-bottom:10px; }
+        .pace-prev-needed { display:flex; gap:10px; flex-wrap:wrap; }
+        .pace-prev-needed-item { flex:1; min-width:80px; text-align:center; }
+        .pace-prev-needed-val { font-size:1.8rem; font-weight:800; color:var(--green-mid); }
+        .pace-prev-needed-lbl { font-size:0.65rem; color:var(--text-3); margin-top:2px; }
 
         /* ── Meta positions ── */
         .meta-pos-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
@@ -219,6 +301,15 @@
         .mini-bar { background: var(--green-bg); border-radius: 3px; height: 5px; margin-top: 5px; overflow: hidden; }
         .mini-bar-fill { height: 100%; border-radius: 3px; background: var(--green-mid); }
 
+        /* ── Alerta vermelho ── */
+        .alerta-banner {
+            background: var(--red-bg); border: 1px solid #f5c6c2;
+            border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+            font-size: 0.8rem; font-weight: 600; color: var(--red);
+            display: flex; align-items: flex-start; gap: 10px;
+        }
+        .alerta-banner-icon { font-size: 1.1rem; line-height: 1; flex-shrink: 0; }
+        .alerta-banner-text { line-height: 1.4; }
         /* ── Em construção ── */
         .em-construcao-banner {
             background: var(--amber-bg); border-bottom: 1px solid #f5d9a0;
@@ -273,9 +364,7 @@
 -->
 <script>
 const CONFIG = {
-    linkDashboardExterno: "#",
-    nomeDashboardExterno: "Dashboard Operacional"
-};
+        };
 
 const DADOS = {
 
@@ -293,7 +382,45 @@ const DADOS = {
                 { posicao: "UX Designer",    vagasMeta: 3, contratados: 1 }
             ]
         },
-        tempoMedioFechamento: 22,
+        tempoMedioPorVaga: [
+            { vaga: "Dev Frontend",   dias: 18, slaAlvo: 25 },
+            { vaga: "Analista de RH", dias: 24, slaAlvo: 20 },
+            { vaga: "Coord. Ops",     dias: 15, slaAlvo: 20 },
+            { vaga: "UX Designer",    dias: 30, slaAlvo: 25 }
+        ],
+        etapas: [
+            { etapa: "Abordados",     candidatos: 120 },
+            { etapa: "Triagem",       candidatos: 72  },
+            { etapa: "Entrevista RH", candidatos: 38  },
+            { etapa: "Case/Técnico",  candidatos: 18  },
+            { etapa: "Cultura",       candidatos: 10  },
+            { etapa: "Oferta",        candidatos: 7   },
+            { etapa: "Contratados",   candidatos: 6   }
+        ],
+        vagasDetalhes: {
+            abertas:    [ { nome: "Dev Frontend", recrutador: "Ana Lima", abertura: "2026-03-02", slaAlvo: 25 }, { nome: "Analista de RH", recrutador: "Bruno Melo", abertura: "2026-03-05", slaAlvo: 20 } ],
+            fechadas:   [ { nome: "Coord. Ops", recrutador: "Carol Dias", fechamento: "2026-03-20", dias: 15 }, { nome: "UX Designer", recrutador: "Ana Lima", fechamento: "2026-03-25", dias: 30 } ],
+            congeladas: [ { nome: "Analista de RH", recrutador: "Bruno Melo", congelamento: "2026-03-15", motivo: "revisão de budget" } ],
+            canceladas: [ { nome: "Coord. Ops", recrutador: "Carol Dias", cancelamento: "2026-03-10", motivo: "reestruturação interna" } ]
+        },
+        vagasHistorico: [
+            { id:"dev-frontend-mar", nome:"Dev Frontend",   recrutador:"Ana Lima",   status:"aberta",  abertaEm:"2026-03-02", vagasMeta:2, slaAlvo:25, candidaturasTotal:42,
+              etapas:{ inscritos:42, triados:25, inicial:14, caseTecnico:8, cultura:5, aprovados:3, contratados:2 },
+              origens:{ linkedin:28, indicacao:8, site:4, outros:2 },
+              observacao:"Processo aguardando aprovação de headcount para segunda vaga." },
+            { id:"rh-mar",           nome:"Analista de RH", recrutador:"Bruno Melo", status:"aberta",  abertaEm:"2026-03-05", vagasMeta:3, slaAlvo:20, candidaturasTotal:35,
+              etapas:{ inscritos:35, triados:20, inicial:11, caseTecnico:6, cultura:3, aprovados:2, contratados:2 },
+              origens:{ linkedin:20, indicacao:5, site:7, outros:3 },
+              observacao:"Buscando candidatos com experiência em HRBP." },
+            { id:"ops-mar",          nome:"Coord. Ops",     recrutador:"Carol Dias", status:"fechada", abertaEm:"2026-03-01", fechadaEm:"2026-03-20", vagasMeta:1, slaAlvo:20, candidaturasTotal:18,
+              etapas:{ inscritos:18, triados:12, inicial:6,  caseTecnico:3, cultura:2, aprovados:1, contratados:1 },
+              origens:{ linkedin:12, indicacao:3, site:2, outros:1 },
+              observacao:"" },
+            { id:"ux-mar",           nome:"UX Designer",    recrutador:"Ana Lima",   status:"fechada", abertaEm:"2026-02-24", fechadaEm:"2026-03-25", vagasMeta:1, slaAlvo:25, candidaturasTotal:13,
+              etapas:{ inscritos:13, triados:8,  inicial:5,  caseTecnico:2, cultura:1, aprovados:1, contratados:1 },
+              origens:{ linkedin:9, indicacao:2, site:1, outros:1 },
+              observacao:"" }
+        ],
         rankingVagas: [
             { vaga: "Dev Frontend",   candidaturas: 42 },
             { vaga: "Analista de RH", candidaturas: 35 },
@@ -310,7 +437,7 @@ const DADOS = {
             motivos: [
                 { motivo: "Modelo PJ/CLT",           recusaram: 8  },
                 { motivo: "Modelo de trabalho",       recusaram: 6  },
-                { motivo: "Baixa remuneração",        recusaram: 10 },
+                { motivo: "Divergência de expectativa salarial",        recusaram: 10 },
                 { motivo: "Localização",              recusaram: 4  },
                 { motivo: "Proposta concorrente",     recusaram: 7  },
                 { motivo: "Benefícios insuficientes", recusaram: 5  }
@@ -319,46 +446,303 @@ const DADOS = {
     },
 
     "2026-04": {
-        vagas: { abertas: 12, fechadas: 8, congeladas: 3, canceladas: 1 },
-        candidaturas: { media: 24 },
-        sla: { dentro: 6, fora: 2 },
-        desligamentos: { total: 20, precoce: 2 },
+        vagas: { abertas: 4, fechadas: 5, congeladas: 1, canceladas: 0 },
+        candidaturas: { media: 185 },
+        sla: { dentro: 4, fora: 7 },
+        desligamentos: { total: 0, precoce: 0 },
         meta: {
-            concluida: 8, total: 12,
+            concluida: 5, total: 11,
             posicoes: [
-                { posicao: "Dev Backend",     vagasMeta: 3, contratados: 2 },
-                { posicao: "Dev Frontend",    vagasMeta: 2, contratados: 2 },
-                { posicao: "Product Manager", vagasMeta: 3, contratados: 2 },
-                { posicao: "Analista de RH",  vagasMeta: 2, contratados: 1 },
-                { posicao: "Coord. Ops",      vagasMeta: 2, contratados: 1 }
+                { posicao: "SDR",             vagasMeta: 5, contratados: 3 },
+                { posicao: "Closer",          vagasMeta: 3, contratados: 0 },
+                { posicao: "Farmer",          vagasMeta: 1, contratados: 0 },
+                { posicao: "Designer Sênior", vagasMeta: 1, contratados: 1 },
+                { posicao: "PD Sênior",       vagasMeta: 1, contratados: 1 }
             ]
         },
-        tempoMedioFechamento: 19,
+        tempoMedioPorVaga: [
+            { vaga: "SDR",                  dias: 24, slaAlvo: 30 },
+            { vaga: "Closer",               dias: 21, slaAlvo: 30 },
+            { vaga: "Farmer",               dias: 21, slaAlvo: 30 },
+            { vaga: "Designer Sênior",      dias: 29, slaAlvo: 30 },
+            { vaga: "PD Sênior",            dias: 28, slaAlvo: 30 },
+            { vaga: "PD Internal Tools",    dias: 30, slaAlvo: 30 }
+        ],
+        etapas: [
+            { etapa: "Inscritos",    candidatos: 1110 },
+            { etapa: "Triados",      candidatos: 397  },
+            { etapa: "Inicial",      candidatos: 314  },
+            { etapa: "Case Tecnico", candidatos: 112  },
+            { etapa: "Cultura",      candidatos: 44   },
+            { etapa: "Aprovados",    candidatos: 22   },
+            { etapa: "Contratados",  candidatos: 21   }
+        ],
+        vagasDetalhes: {
+            abertas:    [ { nome: "Closer", recrutador: "Ana",  abertura: "2026-04-09", slaAlvo: 30, cadeiras: 3 }, { nome: "Farmer", recrutador: "Lara", abertura: "2026-04-09", slaAlvo: 30, cadeiras: 1 } ],
+            fechadas:   [ { nome: "SDR",                recrutador: "Lara",  fechamento: "2026-04-09", dias: 24 }, { nome: "Designer Sênior", recrutador: "Lara", fechamento: "2026-04-16", dias: 29 }, { nome: "PD Sênior", recrutador: "Lara", fechamento: "2026-04-29", dias: 28 } ],
+            congeladas: [ { nome: "PD Internal Tools",  recrutador: "Lara",  congelamento: "2026-04-30", motivo: "redirecionamento de prioridade" } ],
+            canceladas: []
+        },
+        vagasHistorico: [
+            { id:"sdr-abr",      nome:"SDR",                recrutador:"Lara",  status:"fechada", abertaEm:"2025-11-28", fechadaEm:"2026-04-09", vagasMeta:5, slaAlvo:30, candidaturasTotal:735,
+              etapas:{ inscritos:735, triados:343, inicial:282, caseTecnico:100, cultura:40, aprovados:20, contratados:19 },
+              origens:{ linkedin:627, indicacao:33, site:18, outros:57 },
+              observacao:"vaga aberta desde 28/11/2025 — 3 admissões em abril antes do fechamento",
+              instancias:[
+                {status:"fechada",abertaEm:"2026-03-20",fechadaEm:"2026-04-09",dias:20},
+                {status:"fechada",abertaEm:"2026-03-17",fechadaEm:"2026-04-09",dias:23},
+                {status:"fechada",abertaEm:"2026-03-11",fechadaEm:"2026-04-09",dias:29}
+              ] },
+            { id:"closer-abr",   nome:"Closer",             recrutador:"Ana",   status:"aberta",  abertaEm:"2026-04-09", vagasMeta:3, slaAlvo:30, candidaturasTotal:63,
+              etapas:{ inscritos:63, triados:11, inicial:5, caseTecnico:3, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:57, indicacao:4, site:1, outros:1 },
+              observacao:"",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-04-09"},
+                {status:"aberta",abertaEm:"2026-04-09"},
+                {status:"aberta",abertaEm:"2026-04-09"}
+              ] },
+            { id:"farmer-abr",   nome:"Farmer",             recrutador:"Lara",  status:"aberta",  abertaEm:"2026-04-09", vagasMeta:1, slaAlvo:30, candidaturasTotal:62,
+              etapas:{ inscritos:62, triados:13, inicial:8, caseTecnico:3, cultura:1, aprovados:0, contratados:0 },
+              origens:{ linkedin:58, indicacao:0, site:1, outros:3 },
+              observacao:"",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-04-09"}
+              ] },
+            { id:"designer-abr", nome:"Designer Sênior",    recrutador:"Lara",  status:"fechada", abertaEm:"2026-03-18", fechadaEm:"2026-04-16", vagasMeta:1, slaAlvo:30, candidaturasTotal:209,
+              etapas:{ inscritos:209, triados:15, inicial:12, caseTecnico:2, cultura:1, aprovados:1, contratados:1 },
+              origens:{ linkedin:206, indicacao:1, site:2, outros:0 },
+              observacao:"",
+              instancias:[
+                {status:"fechada",abertaEm:"2026-03-18",fechadaEm:"2026-04-16",dias:29}
+              ] },
+            { id:"pd-abr",       nome:"PD Sênior",          recrutador:"Lara",  status:"fechada", abertaEm:"2026-04-01", fechadaEm:"2026-04-29", vagasMeta:1, slaAlvo:30, candidaturasTotal:25,
+              etapas:{ inscritos:25, triados:8, inicial:4, caseTecnico:3, cultura:1, aprovados:1, contratados:1 },
+              origens:{ linkedin:23, indicacao:1, site:0, outros:1 },
+              observacao:"",
+              instancias:[
+                {status:"fechada",abertaEm:"2026-04-01",fechadaEm:"2026-04-29",dias:28}
+              ] },
+            { id:"pdint-abr",    nome:"PD Internal Tools",  recrutador:"Lara",  status:"congelada", abertaEm:"2026-04-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:16,
+              etapas:{ inscritos:16, triados:7, inicial:3, caseTecnico:1, cultura:1, aprovados:0, contratados:0 },
+              origens:{ linkedin:14, indicacao:1, site:1, outros:0 },
+              observacao:"vaga congelada por redirecionamento de prioridade",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-04-01"}
+              ] }
+        ],
         rankingVagas: [
-            { vaga: "Dev Backend",     candidaturas: 58 },
-            { vaga: "Dev Frontend",    candidaturas: 45 },
-            { vaga: "Product Manager", candidaturas: 37 },
-            { vaga: "Analista de RH",  candidaturas: 29 },
-            { vaga: "Coord. Ops",      candidaturas: 23 }
+            { vaga: "SDR",                candidaturas: 735 },
+            { vaga: "Designer Sênior",    candidaturas: 209 },
+            { vaga: "Closer",             candidaturas: 63  },
+            { vaga: "Farmer",             candidaturas: 62  },
+            { vaga: "PD Sênior",          candidaturas: 25  },
+            { vaga: "PD Internal Tools",  candidaturas: 16  }
         ],
         recrutadores: [
-            { nome: "Ana Lima",   fechadas: 4, fechadasDentroSLA: 3 },
-            { nome: "Bruno Melo", fechadas: 3, fechadasDentroSLA: 2 },
-            { nome: "Carol Dias", fechadas: 1, fechadasDentroSLA: 1 }
+            { nome: "Ana",   fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Júlia", fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Lara",  fechadas: 5, fechadasDentroSLA: 5 }
         ],
         recusas: {
-            abordados: 50,
+            abordados: 1110,
             motivos: [
-                { motivo: "Modelo PJ/CLT",           recusaram: 12 },
-                { motivo: "Modelo de trabalho",       recusaram: 8  },
-                { motivo: "Baixa remuneração",        recusaram: 14 },
-                { motivo: "Localização",              recusaram: 5  },
-                { motivo: "Proposta concorrente",     recusaram: 11 },
-                { motivo: "Benefícios insuficientes", recusaram: 7  }
+                { motivo: "Reprovado em testes",     recusaram: 378 },
+                { motivo: "Sem fit",                 recusaram: 287 },
+                { motivo: "Outros motivos",          recusaram: 93  },
+                { motivo: "Localidade",              recusaram: 28  },
+                { motivo: "Desistência",             recusaram: 23  },
+                { motivo: "Senioridade",             recusaram: 14  }
             ]
         }
-    }
+    },
 
+    "2026-05": {
+        vagas: { abertas: 7, fechadas: 0, congeladas: 0, canceladas: 0 },
+        candidaturas: { media: 0 },
+        sla: { dentro: 0, fora: 0 },
+        desligamentos: { total: 0, precoce: 0 },
+        meta: {
+            concluida: 0, total: 18,
+            posicoes: [
+                { posicao: "SDR",                          vagasMeta: 6, contratados: 0 },
+                { posicao: "Closer",                       vagasMeta: 5, contratados: 0 },
+                { posicao: "Farmer",                       vagasMeta: 3, contratados: 0 },
+                { posicao: "Sales Enablement Sênior",      vagasMeta: 1, contratados: 0 },
+                { posicao: "Coord./Supervisão de SDR",     vagasMeta: 1, contratados: 0 },
+                { posicao: "Supervisão de Farmer",         vagasMeta: 1, contratados: 0 },
+                { posicao: "Head/Gerente Sênior de Vendas", vagasMeta: 1, contratados: 0 }
+            ]
+        },
+        tempoMedioPorVaga: [],
+        etapas: [
+            { etapa: "Inscritos",    candidatos: 0 },
+            { etapa: "Triados",      candidatos: 0 },
+            { etapa: "Inicial",      candidatos: 0 },
+            { etapa: "Case Tecnico", candidatos: 0 },
+            { etapa: "Cultura",      candidatos: 0 },
+            { etapa: "Aprovados",    candidatos: 0 },
+            { etapa: "Contratados",  candidatos: 0 }
+        ],
+        vagasDetalhes: {
+            abertas: [
+                { nome: "SDR",                          recrutador: "Júlia",      abertura: "2026-04-02", slaAlvo: 30, cadeiras: 6 },
+                { nome: "Closer",                       recrutador: "Lara / Ana", abertura: "2026-05-01", slaAlvo: 30, cadeiras: 5 },
+                { nome: "Farmer",                       recrutador: "Lara / Ana", abertura: "2026-05-01", slaAlvo: 30, cadeiras: 3 },
+                { nome: "Sales Enablement Sênior",      recrutador: "A definir",  abertura: "2026-05-01", slaAlvo: 30, cadeiras: 1 },
+                { nome: "Coord./Supervisão de SDR",     recrutador: "A definir",  abertura: "2026-05-15", slaAlvo: 30, cadeiras: 1 },
+                { nome: "Supervisão de Farmer",         recrutador: "A definir",  abertura: "2026-05-01", slaAlvo: 30, cadeiras: 1 },
+                { nome: "Head/Gerente Sênior de Vendas (Franquia SP)", recrutador: "A definir", abertura: "2026-05-25", slaAlvo: 45, cadeiras: 1 }
+            ],
+            fechadas: [],
+            congeladas: [], canceladas: []
+        },
+        vagasHistorico: [
+            { id:"sdr-mai",      nome:"SDR",                     recrutador:"Júlia", status:"aberta", abertaEm:"2026-04-02", vagasMeta:6, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"4 cadeiras novas + 2 realocadas de abril (6 total)",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-04-02"},
+                {status:"aberta",abertaEm:"2026-04-09"},
+                {status:"aberta",abertaEm:"2026-04-15"},
+                {status:"aberta",abertaEm:"2026-04-15"},
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"}
+              ] },
+            { id:"closer-mai",   nome:"Closer",                  recrutador:"Lara / Ana", status:"aberta", abertaEm:"2026-05-01", vagasMeta:5, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"2 cadeiras novas + 3 realocadas de abril (5 total)",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"}
+              ] },
+            { id:"farmer-mai",   nome:"Farmer",                  recrutador:"Lara / Ana", status:"aberta", abertaEm:"2026-05-01", vagasMeta:3, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"2 cadeiras novas + 1 realocada de abril (3 total)",
+              instancias:[
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"},
+                {status:"aberta",abertaEm:"2026-05-01"}
+              ] },
+            { id:"se-mai",       nome:"Sales Enablement Sênior", recrutador:"A definir", status:"aberta", abertaEm:"2026-05-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[] },
+            { id:"csdr-mai",     nome:"Coord./Supervisão de SDR", recrutador:"A definir", status:"aberta", abertaEm:"2026-05-15", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"Substituição da Lara — abertura prevista para 2ª quinzena.", instancias:[] },
+            { id:"sf-mai",       nome:"Supervisão de Farmer",    recrutador:"A definir", status:"aberta", abertaEm:"2026-05-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[] },
+            { id:"hgv-mai",      nome:"Head/Gerente Sênior de Vendas (Franquia SP)", recrutador:"A definir", status:"aberta", abertaEm:"2026-05-25", vagasMeta:1, slaAlvo:45, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"Início previsto para final do mês.", instancias:[{status:"aberta",abertaEm:"2026-05-25"}] }
+        ],
+        rankingVagas: [
+            { vaga: "SDR",                          candidaturas: 0 },
+            { vaga: "Closer",                       candidaturas: 0 },
+            { vaga: "Farmer",                       candidaturas: 0 },
+            { vaga: "Sales Enablement Sênior",      candidaturas: 0 },
+            { vaga: "Coord./Supervisão de SDR",     candidaturas: 0 },
+            { vaga: "Supervisão de Farmer",         candidaturas: 0 },
+            { vaga: "Head/Gerente Sênior de Vendas (Franquia SP)", candidaturas: 0 }
+        ],
+        recrutadores: [
+            { nome: "Ana",   fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Júlia", fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Lara",  fechadas: 0, fechadasDentroSLA: 0 }
+        ],
+        recusas: { abordados: 0, motivos: [] }
+    },
+
+    "2026-06": {
+        vagas: { abertas: 5, fechadas: 0, congeladas: 0, canceladas: 0 },
+        candidaturas: { media: 0 },
+        sla: { dentro: 0, fora: 0 },
+        desligamentos: { total: 0, precoce: 0 },
+        meta: {
+            concluida: 0, total: 9,
+            posicoes: [
+                { posicao: "SDR",                  vagasMeta: 4, contratados: 0 },
+                { posicao: "Closer",               vagasMeta: 2, contratados: 0 },
+                { posicao: "Farmer",               vagasMeta: 1, contratados: 0 },
+                { posicao: "Conteúdo",             vagasMeta: 1, contratados: 0 },
+                { posicao: "Assistente de Vendas", vagasMeta: 1, contratados: 0 }
+            ]
+        },
+        tempoMedioPorVaga: [],
+        etapas: [
+            { etapa: "Inscritos",    candidatos: 0 },
+            { etapa: "Triados",      candidatos: 0 },
+            { etapa: "Inicial",      candidatos: 0 },
+            { etapa: "Case Tecnico", candidatos: 0 },
+            { etapa: "Cultura",      candidatos: 0 },
+            { etapa: "Aprovados",    candidatos: 0 },
+            { etapa: "Contratados",  candidatos: 0 }
+        ],
+        vagasDetalhes: {
+            abertas: [
+                { nome: "SDR",                  recrutador: "Lara",  abertura: "2026-06-01", slaAlvo: 30, cadeiras: 4 },
+                { nome: "Closer",               recrutador: "Lara",  abertura: "2026-06-01", slaAlvo: 30, cadeiras: 2 },
+                { nome: "Farmer",               recrutador: "Lara",  abertura: "2026-06-01", slaAlvo: 30, cadeiras: 1 },
+                { nome: "Conteúdo",             recrutador: "Júlia", abertura: "2026-06-01", slaAlvo: 30, cadeiras: 1 },
+                { nome: "Assistente de Vendas", recrutador: "Júlia", abertura: "2026-06-01", slaAlvo: 30, cadeiras: 1 }
+            ],
+            fechadas: [], congeladas: [], canceladas: []
+        },
+        vagasHistorico: [
+            { id:"sdr-jun",  nome:"SDR",                  recrutador:"Lara",  status:"aberta", abertaEm:"2026-06-01", vagasMeta:4, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[
+                {status:"aberta",abertaEm:"2026-06-01"},
+                {status:"aberta",abertaEm:"2026-06-01"},
+                {status:"aberta",abertaEm:"2026-06-01"},
+                {status:"aberta",abertaEm:"2026-06-01"}
+              ] },
+            { id:"closer-jun", nome:"Closer",             recrutador:"Lara",  status:"aberta", abertaEm:"2026-06-01", vagasMeta:2, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[
+                {status:"aberta",abertaEm:"2026-06-01"},
+                {status:"aberta",abertaEm:"2026-06-01"}
+              ] },
+            { id:"farmer-jun", nome:"Farmer",             recrutador:"Lara",  status:"aberta", abertaEm:"2026-06-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[{status:"aberta",abertaEm:"2026-06-01"}] },
+            { id:"cont-jun",   nome:"Conteúdo",           recrutador:"Júlia", status:"aberta", abertaEm:"2026-06-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[{status:"aberta",abertaEm:"2026-06-01"}] },
+            { id:"av-jun",     nome:"Assistente de Vendas", recrutador:"Júlia", status:"aberta", abertaEm:"2026-06-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:0,
+              etapas:{ inscritos:0, triados:0, inicial:0, caseTecnico:0, cultura:0, aprovados:0, contratados:0 },
+              origens:{ linkedin:0, indicacao:0, site:0, outros:0 },
+              observacao:"", instancias:[{status:"aberta",abertaEm:"2026-06-01"}] }
+        ],
+        rankingVagas: [
+            { vaga: "SDR",                  candidaturas: 0 },
+            { vaga: "Closer",               candidaturas: 0 },
+            { vaga: "Farmer",               candidaturas: 0 },
+            { vaga: "Conteúdo",             candidaturas: 0 },
+            { vaga: "Assistente de Vendas", candidaturas: 0 }
+        ],
+        recrutadores: [
+            { nome: "Ana",   fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Júlia", fechadas: 0, fechadasDentroSLA: 0 },
+            { nome: "Lara",  fechadas: 0, fechadasDentroSLA: 0 }
+        ],
+        recusas: { abordados: 0, motivos: [] }
+    }
 };
 </script>
 
@@ -388,13 +772,16 @@ const DADOS = {
         <p class="page-subtitle">indicadores de pessoas — <span id="labelPeriodoSub">—</span></p>
     </div>
 
+    <div class="alerta-banner" id="alertaBanner" style="display:none;">
+        <span class="alerta-banner-icon">⚠</span>
+        <span class="alerta-banner-text" id="alertaBannerText"></span>
+    </div>
+
     <!-- ── VISÃO GERAL ── -->
     <div class="section-title">VISÃO GERAL <span class="st-sub">— vagas no período</span></div>
     <div class="kpi-grid">
 
-        <div class="kpi-card">
-            <div class="kpi-top">
-                <div class="kpi-label">Vagas em Aberto</div>
+        <div class="kpi-card" onclick="abrirModal('abertas')" title="Ver vagas em aberto"><div class="kpi-top"><div class="kpi-label">Vagas em Aberto</div>
                 <div class="kpi-icon-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
@@ -405,9 +792,7 @@ const DADOS = {
             <div class="kpi-sub">posições ativas</div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-top">
-                <div class="kpi-label">Vagas Fechadas</div>
+        <div class="kpi-card" onclick="abrirModal('fechadas')" title="Ver vagas fechadas"><div class="kpi-top"><div class="kpi-label">Vagas Fechadas</div>
                 <div class="kpi-icon-wrap">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
@@ -418,9 +803,7 @@ const DADOS = {
             <div class="kpi-sub">concluídas no período</div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-top">
-                <div class="kpi-label">Vagas Congeladas</div>
+        <div class="kpi-card" onclick="abrirModal('congeladas')" title="Ver vagas congeladas"><div class="kpi-top"><div class="kpi-label">Vagas Congeladas</div>
                 <div class="kpi-icon-wrap amber">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
@@ -431,9 +814,7 @@ const DADOS = {
             <div class="kpi-sub">temporariamente pausadas</div>
         </div>
 
-        <div class="kpi-card">
-            <div class="kpi-top">
-                <div class="kpi-label">Vagas Canceladas</div>
+        <div class="kpi-card" onclick="abrirModal('canceladas')" title="Ver vagas canceladas"><div class="kpi-top"><div class="kpi-label">Vagas Canceladas</div>
                 <div class="kpi-icon-wrap red">
                     <svg viewBox="0 0 24 24" fill="none" stroke="#dc4a3d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>
@@ -444,23 +825,6 @@ const DADOS = {
             <div class="kpi-sub">encerradas sem preenchimento</div>
         </div>
 
-    </div>
-
-    <!-- Acesso rápido -->
-    <div class="link-ext-card">
-        <div class="link-ext-info">
-            <div class="link-ext-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="#1a5c38" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                    <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-            </div>
-            <div>
-                <div class="link-ext-lbl">Acesso Rápido</div>
-                <div class="link-ext-nome" id="linkNome">—</div>
-            </div>
-        </div>
-        <a class="link-btn" id="linkBtn" href="#" target="_blank">abrir dashboard &#8594;</a>
     </div>
 
     <!-- ── PERFORMANCE ── -->
@@ -474,30 +838,59 @@ const DADOS = {
 
         <div class="card">
             <h3>SLA — vagas dentro do prazo</h3>
-            <div style="margin-top:6px;">
-                <div class="sla-bar-bg">
-                    <div class="sla-bar-fill" id="slaFill">0%</div>
-                </div>
-                <div class="sla-labels">
+            <div class="sla-hero-row">
+                <div class="sla-hero-pct" id="slaHeroPct">—%</div>
+                <div class="sla-hero-sub">
                     <span id="slaInfo">—</span>
-                    <span id="slaTotal">—</span>
-                </div>
-                <div class="sla-mini-grid">
-                    <div class="sla-mini-box ok">
-                        <div class="val" id="slaDentro">—</div>
-                        <div class="lbl">dentro do SLA</div>
-                    </div>
-                    <div class="sla-mini-box nok">
-                        <div class="val" id="slaFora">—</div>
-                        <div class="lbl">fora do SLA</div>
-                    </div>
+                    <span id="slaTotal" style="color:var(--text-3);">—</span>
                 </div>
             </div>
+            <div class="sla-bar-bg" style="margin-top:10px;">
+                <div class="sla-bar-fill" id="slaFill" style="min-width:0;"></div>
+            </div>
+            <div class="sla-mini-grid">
+                <div class="sla-mini-box ok">
+                    <div class="val" id="slaDentro">—</div>
+                    <div class="lbl">dentro do SLA</div>
+                </div>
+                <div class="sla-mini-box nok">
+                    <div class="val" id="slaFora">—</div>
+                    <div class="lbl">fora do SLA</div>
+                </div>
+                <div class="sla-mini-box neutral">
+                    <div class="val" id="slaMediaDias">—</div>
+                    <div class="lbl">dias médios p/ fechar</div>
+                </div>
+            </div>
+            <div id="slaVagasList"></div>
         </div>
 
     </div>
 
     <!-- ── QUALIDADE ── -->
+    <!-- ── FUNIL DE CONVERSÃO ── -->
+    <div class="section-title">CONVERSÃO <span class="st-sub">— candidatos por etapa</span></div>
+    <div class="quality-grid">
+
+        <div class="card">
+            <h3>Funil de Candidatos</h3>
+            <div id="funilPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;margin-bottom:12px;"></div>
+            <div id="funilEtapas"></div>
+        </div>
+
+        <div class="card reprova-card">
+            <h3>Etapa com Maior Reprovação</h3>
+            <div id="reprovaPills" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;margin-bottom:12px;"></div>
+            <div>
+                <div class="reprova-tag">maior queda</div>
+                <div id="etapaMaisReprova" class="reprova-nome">—</div>
+                <div id="etapaMaisReprovaSub" class="reprova-sub">—</div>
+                <div id="etapaReprovaVis" style="margin-top:16px;"></div>
+            </div>
+        </div>
+
+    </div>
+
     <div class="section-title">QUALIDADE <span class="st-sub">— desligamentos e tempo de fechamento</span></div>
     <div class="quality-grid">
 
@@ -515,13 +908,9 @@ const DADOS = {
             </div>
         </div>
 
-        <div class="card" style="display:flex;flex-direction:column;justify-content:center;">
-            <h3>Tempo Médio de Fechamento</h3>
-            <div style="display:flex;align-items:baseline;gap:6px;margin-top:14px;">
-                <span class="tempo-val" id="tempoMedio">—</span>
-                <span class="tempo-unit">dias</span>
-            </div>
-            <div style="font-size:0.72rem;color:var(--text-3);margin-top:8px;">desde abertura até fechamento da vaga</div>
+        <div class="card">
+            <h3>Tempo Médio de Fechamento <span style="font-weight:400;font-size:0.72rem;color:var(--text-3);">por vaga</span></h3>
+            <div id="tempoVagaList" style="margin-top:12px;"></div>
         </div>
 
     </div>
@@ -535,7 +924,7 @@ const DADOS = {
             <div class="meta-percent" id="metaPct">—</div>
         </div>
         <div class="meta-bar-bg">
-            <div class="meta-bar-fill" id="metaFill">—</div>
+            <div class="meta-bar-fill" id="metaFill" style="min-width:0;">—</div>
         </div>
         <div class="meta-detail">
             <span id="metaDetalhe">—</span>
@@ -550,12 +939,32 @@ const DADOS = {
 
         <div class="meta-pos-section">
             <div class="meta-pos-title">contratações por posição — contratados vs. faltam</div>
-            <canvas id="chartMetaPosicoes" style="display:none;"></canvas>
+            <div id="chartMetaPosWrap" style="position:relative;"><canvas id="chartMetaPosicoes" style="display:none;"></canvas></div>
             <div id="metaPosPlaceholder" style="display:none;text-align:center;color:var(--text-3);font-size:0.78rem;padding:18px 0;">
                 Adicione <code>meta.posicoes</code> nos DADOS para visualizar o gráfico por posição.
             </div>
         </div>
 
+    </div>
+
+    <!-- ── STATUS DAS VAGAS ── -->
+    <div class="section-title">STATUS DAS VAGAS <span class="st-sub">— todas as posições em andamento</span></div>
+    <div class="card" style="padding:0;overflow:hidden;">
+        <div id="tblVagasWrap" style="overflow-x:auto;">
+            <table class="vagas-table">
+                <thead>
+                    <tr>
+                        <th>Vaga / Recrutador(a)</th>
+                        <th>Progresso</th>
+                        <th>Candidaturas</th>
+                        <th>Dias aberta</th>
+                        <th>SLA</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="tblVagas"></tbody>
+            </table>
+        </div>
     </div>
 
     <!-- ── DETALHAMENTO ── -->
@@ -575,6 +984,11 @@ const DADOS = {
             <table class="rank-table" id="tblRecrutadores"></table>
         </div>
 
+    </div>
+
+    <div class="card" id="cardPacePrevisao" style="margin-top:14px;display:none;">
+        <h3>Previsão de Pace <span id="paceMesLabelPrevisao" style="font-size:0.68rem;color:var(--text-3);font-weight:400;margin-left:5px;"></span></h3>
+        <div id="pacePrevisaoBody"></div>
     </div>
 
     <!-- ── MOTIVOS DE RECUSA ── -->
@@ -623,8 +1037,20 @@ const MESES_PT = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho",
 const mesesDisponiveis = Object.keys(DADOS).sort();
 
 let mesAtivo = (() => {
-    const hoje = new Date().toISOString().slice(0, 7);
-    return DADOS[hoje] ? hoje : mesesDisponiveis[mesesDisponiveis.length - 1];
+    const hoje = new Date();
+    const mesLocal = hoje.getFullYear() + "-" + String(hoje.getMonth() + 1).padStart(2, "0");
+    // Prefer current local month only if it has real data
+    if (DADOS[mesLocal]) {
+        const d = DADOS[mesLocal];
+        if ((d.vagas.abertas + d.vagas.fechadas) > 0 || d.meta.concluida > 0) return mesLocal;
+    }
+    // Fall back to the most recent month that has actual data
+    for (let i = mesesDisponiveis.length - 1; i >= 0; i--) {
+        const m = mesesDisponiveis[i];
+        const d = DADOS[m];
+        if (d && ((d.vagas.abertas + d.vagas.fechadas) > 0 || d.meta.concluida > 0)) return m;
+    }
+    return mesesDisponiveis[mesesDisponiveis.length - 1];
 })();
 
 let _chartCand = null, _chartDesl = null, _chartRecBar = null, _chartRecLine = null, _chartMetaPos = null;
@@ -728,9 +1154,20 @@ function renderizar() {
     document.getElementById("labelMes").textContent       = labelMesLong(mesAtivo);
     document.getElementById("labelPeriodoSub").textContent = `${fmtBR(start)} a ${fmtBR(end)} de ${mesAtivo.split("-")[0]}`;
 
+    // Banner de alerta por mês
+    const ALERTAS_MES = {
+        "2026-04": "6 cadeiras não preenchidas em abril (2 SDR, 3 Closer e 1 Farmer) foram realocadas para a primeira semana de maio.",
+        "2026-05": "A meta de maio inclui 6 cadeiras realocadas de abril (2 SDR, 3 Closer e 1 Farmer), com previsão de abertura na primeira semana do mês."
+    };
+    const alertaEl = document.getElementById("alertaBanner");
+    if (ALERTAS_MES[mesAtivo]) {
+        alertaEl.style.display = "flex";
+        document.getElementById("alertaBannerText").textContent = ALERTAS_MES[mesAtivo];
+    } else {
+        alertaEl.style.display = "none";
+    }
+
     // Link externo
-    document.getElementById("linkNome").textContent = CONFIG.nomeDashboardExterno;
-    document.getElementById("linkBtn").href         = CONFIG.linkDashboardExterno;
 
     // KPIs
     document.getElementById("kpi-abertas").textContent    = d.vagas.abertas;
@@ -751,12 +1188,42 @@ function renderizar() {
     // SLA
     const slaTotal = d.sla.dentro + d.sla.fora;
     const slaPct   = slaTotal > 0 ? Math.round(d.sla.dentro / slaTotal * 100) : 0;
+    const slaHeroEl = document.getElementById("slaHeroPct");
+    slaHeroEl.textContent = slaPct + "%";
+    slaHeroEl.style.color = slaPct >= 80 ? "var(--green)" : slaPct >= 50 ? "var(--amber)" : "var(--red)";
     document.getElementById("slaFill").style.width   = slaPct + "%";
-    document.getElementById("slaFill").textContent   = slaPct + "%";
-    document.getElementById("slaInfo").textContent   = `${d.sla.dentro} dentro · ${d.sla.fora} fora`;
-    document.getElementById("slaTotal").textContent  = `${slaTotal} vagas avaliadas`;
+    document.getElementById("slaInfo").textContent   = `${d.sla.dentro} dentro do prazo · ${d.sla.fora} fora`;
+    document.getElementById("slaTotal").textContent  = `${slaTotal} vaga(s) avaliadas`;
     document.getElementById("slaDentro").textContent = d.sla.dentro;
     document.getElementById("slaFora").textContent   = d.sla.fora;
+    // Média de dias e lista por vaga
+    let totalDiasF = 0, countFechadasF = 0;
+    const slaVagaItems = [];
+    if (d.vagasHistorico) {
+        const hojeF = new Date();
+        d.vagasHistorico.forEach(v => {
+            if (v.instancias) {
+                v.instancias.forEach((inst, ii) => {
+                    const dias = inst.status === "fechada" ? inst.dias : Math.round((hojeF - new Date(inst.abertaEm)) / 86400000);
+                    if (inst.status === "fechada") { totalDiasF += dias; countFechadasF++; }
+                    const sp = dias / v.slaAlvo;
+                    const cor = sp <= 0.75 ? "var(--green)" : sp <= 1.0 ? "var(--amber)" : "var(--red)";
+                    const lbl = sp <= 0.75 ? "No prazo" : sp <= 1.0 ? "Atenção" : "Fora do SLA";
+                    const nomeItem = v.instancias.length > 1 ? `${v.nome} #${ii+1}` : v.nome;
+                    slaVagaItems.push({ nome: nomeItem, dias, slaAlvo: v.slaAlvo, cor, lbl, status: inst.status });
+                });
+            }
+        });
+    }
+    document.getElementById("slaMediaDias").textContent = countFechadasF > 0 ? Math.round(totalDiasF / countFechadasF) + "d" : "—";
+    document.getElementById("slaVagasList").innerHTML = slaVagaItems.length > 0
+        ? slaVagaItems.map(s =>
+            `<div class="sla-vaga-item">
+                <span class="sla-vaga-nome">${s.nome}</span>
+                <span class="sla-vaga-dias">${s.dias}d / ${s.slaAlvo}d</span>
+                <span style="font-size:0.67rem;font-weight:700;color:${s.cor};white-space:nowrap;">${s.lbl}</span>
+            </div>`).join("")
+        : "";
 
     // Desligamentos
     const pctDesl = d.desligamentos.total > 0 ? Math.round(d.desligamentos.precoce / d.desligamentos.total * 100) : 0;
@@ -769,8 +1236,22 @@ function renderizar() {
         options: { plugins: { legend: { position: "bottom", labels: { font: { size: 11 }, padding: 10, boxWidth: 12 } } }, cutout: "62%" }
     });
 
-    // Tempo médio
-    document.getElementById("tempoMedio").textContent = d.tempoMedioFechamento != null ? d.tempoMedioFechamento : "—";
+    // Tempo médio por vaga
+    if (d.tempoMedioPorVaga && d.tempoMedioPorVaga.length > 0) {
+        const maxDias = Math.max(...d.tempoMedioPorVaga.map(v => v.dias), 1);
+        document.getElementById("tempoVagaList").innerHTML = d.tempoMedioPorVaga.map(v => {
+            const pct = Math.round(v.dias / Math.max(v.dias, v.slaAlvo) * 100);
+            const cor = v.dias <= v.slaAlvo ? "#1a5c38" : "#dc4a3d";
+            const barPct = Math.round(v.dias / maxDias * 100);
+            return `<div style="margin-bottom:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;">
+                    <span style="font-size:0.78rem;color:var(--text);font-weight:500;">${v.vaga}</span>
+                    <span style="font-size:0.78rem;font-weight:700;color:${cor};">${v.dias}d <span style="font-weight:400;font-size:0.68rem;color:var(--text-3);">/ SLA ${v.slaAlvo}d</span></span>
+                </div>
+                <div class="tempo-vaga-bar-wrap"><div class="tempo-vaga-bar-fill" style="width:${barPct}%;background:${cor};"></div></div>
+            </div>`;
+        }).join("");
+    }
 
     // Meta
     const metaPct = Math.round(d.meta.concluida / d.meta.total * 100);
@@ -781,42 +1262,50 @@ function renderizar() {
     const faltam = d.meta.total - d.meta.concluida;
     document.getElementById("metaFaltam").textContent  = faltam > 0 ? `faltam ${faltam} para a meta` : "meta atingida";
 
-    // Pace
+    // Pace + barra colorida
     const pace = calcularPace(d.meta.concluida, d.meta.total);
     const pb = document.getElementById("paceBadge");
     pb.className = "pace-badge " + pace.tipo;
     pb.textContent = pace.label;
     document.getElementById("paceText").textContent = pace.texto;
+    const mf = document.getElementById("metaFill");
+    mf.classList.remove("verde","amarelo","vermelho","cinza");
+    mf.classList.add(pace.tipo);
+    const mp = document.getElementById("metaPct");
+    mp.classList.remove("verde","amarelo","vermelho","cinza");
+    mp.classList.add(pace.tipo);
 
-    // Gráfico por posição
+    // Gráfico por posição (horizontal, compacto)
     const canvasPos   = document.getElementById("chartMetaPosicoes");
     const placeholder = document.getElementById("metaPosPlaceholder");
     if (d.meta.posicoes && d.meta.posicoes.length > 0) {
         placeholder.style.display = "none";
         canvasPos.style.display   = "block";
-        canvasPos.height = d.meta.posicoes.length * 30 + 20;
         const labelsPos   = d.meta.posicoes.map(p => p.posicao);
         const contratados = d.meta.posicoes.map(p => p.contratados);
         const faltamPos   = d.meta.posicoes.map(p => Math.max(0, p.vagasMeta - p.contratados));
         const posRef      = d.meta.posicoes;
         if (_chartMetaPos) _chartMetaPos.destroy();
+        const altura = d.meta.posicoes.length * 22 + 40;
+        document.getElementById("chartMetaPosWrap").style.height = altura + "px";
         _chartMetaPos = new Chart(canvasPos.getContext("2d"), {
             type: "bar",
             data: { labels: labelsPos, datasets: [
-                { label: "Contratados", data: contratados, backgroundColor: "#1a5c38",   borderWidth: 0, borderRadius: 2, maxBarThickness: 12 },
-                { label: "Faltam",      data: faltamPos,   backgroundColor: "#eaf0f5",   borderWidth: 0, borderRadius: 2, maxBarThickness: 12 }
+                { label: "Contratados", data: contratados, backgroundColor: "#1a5c38", borderWidth: 0, borderRadius: 3, barPercentage: 0.85, categoryPercentage: 0.75 },
+                { label: "Faltam",      data: faltamPos,   backgroundColor: "#eaf0f5", borderWidth: 0, borderRadius: 3, barPercentage: 0.85, categoryPercentage: 0.75 }
             ]},
             options: {
                 indexAxis: "y",
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
+                    legend: { position: "bottom", labels: { font: { size: 10 }, padding: 8, boxWidth: 10, color: "#6b7c93" } },
                     tooltip: { callbacks: { afterBody(items) { const i = items[0].dataIndex; return `meta: ${posRef[i].vagasMeta} vaga(s)`; } } }
                 },
                 scales: {
-                    x: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 }, color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
-                    y: { stacked: true, grid: { display: false }, ticks: { font: { size: 11 }, color: "#6b7c93" }, border: { display: false } }
+                    x: { stacked: true, beginAtZero: true, ticks: { stepSize: 1, font: { size: 9 }, color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
+                    y: { stacked: true, grid: { display: false }, border: { display: false }, ticks: { font: { size: 10 }, color: "#6b7c93" } }
                 },
-                layout: { padding: 0 }
+                layout: { padding: { top: 2, bottom: 2 } }
             }
         });
     } else {
@@ -825,16 +1314,149 @@ function renderizar() {
         if (_chartMetaPos) { _chartMetaPos.destroy(); _chartMetaPos = null; }
     }
 
+    // ── Funil helper (global para onclick inline funcionar) ────────────
+    window.renderFunil = function(etapasArr) {
+        if (!etapasArr || etapasArr.length === 0) return;
+        const maxC = etapasArr[0].candidatos || 1;
+        document.getElementById("funilEtapas").innerHTML = etapasArr.map((e, i) => {
+            const pct  = Math.round(e.candidatos / maxC * 100);
+            const prev = i > 0 ? etapasArr[i-1].candidatos : 0;
+            const conv = i > 0 && prev > 0 ? ` (${Math.round(e.candidatos / prev * 100)}% conv.)` : "";
+            const cor  = i === etapasArr.length - 1 ? "#1a5c38" : `hsl(${150 - i*12},${60-i*3}%,${35+i*3}%)`;
+            return `<div class="funil-row">
+                <span class="funil-label">${e.etapa}</span>
+                <div class="funil-bar-wrap"><div class="funil-bar-fill" style="width:${pct}%;background:${cor};"></div></div>
+                <span class="funil-val">${e.candidatos}</span>
+                <span class="funil-pct">${conv}</span>
+            </div>`;
+        }).join("");
+    };
+    const renderFunil = window.renderFunil;
+
+    // Funil de etapas
+    if (d.etapas && d.etapas.length > 0) {
+        renderFunil(d.etapas);
+
+        // ── renderReprova helper (global para onclick inline funcionar) ───
+        window.renderReprova = function(etapasArr) {
+            if (!etapasArr || etapasArr.length === 0) return;
+            let maxQ = 0, idxP = -1;
+            for (let i = 1; i < etapasArr.length; i++) {
+                const q = etapasArr[i-1].candidatos - etapasArr[i].candidatos;
+                if (q > maxQ) { maxQ = q; idxP = i; }
+            }
+            if (idxP < 0) {
+                document.getElementById("etapaMaisReprova").textContent    = "—";
+                document.getElementById("etapaMaisReprovaSub").textContent  = "sem dados suficientes";
+                document.getElementById("etapaReprovaVis").innerHTML        = "";
+                return;
+            }
+            const tx = Math.round(maxQ / etapasArr[idxP-1].candidatos * 100);
+            document.getElementById("etapaMaisReprova").textContent    = etapasArr[idxP].etapa;
+            document.getElementById("etapaMaisReprovaSub").textContent  = `${maxQ} eliminados · ${tx}% de queda`;
+            const ante = etapasArr[idxP - 1];
+            const depo = etapasArr[idxP];
+            const pctD = Math.round(depo.candidatos / ante.candidatos * 100);
+            document.getElementById("etapaReprovaVis").innerHTML = `
+                <div class="reprova-vis-row">
+                    <span class="reprova-vis-label">${ante.etapa}</span>
+                    <div class="reprova-vis-bar"><div class="reprova-vis-fill" style="width:100%;background:var(--green-mid);"></div></div>
+                    <span class="reprova-vis-num" style="color:var(--green-mid);">${ante.candidatos}</span>
+                </div>
+                <div class="reprova-vis-row">
+                    <span class="reprova-vis-label">${depo.etapa}</span>
+                    <div class="reprova-vis-bar"><div class="reprova-vis-fill" style="width:${pctD}%;background:var(--red);"></div></div>
+                    <span class="reprova-vis-num" style="color:var(--red);">${depo.candidatos}</span>
+                </div>
+                <div style="margin-top:8px;font-size:0.67rem;color:var(--text-3);">↓ ${maxQ} candidatos não avançaram desta etapa</div>`;
+        };
+        window.renderReprova(d.etapas);
+
+        // Pills de vaga para hover individual
+        const ETAPA_KEYS = ["inscritos","triados","inicial","caseTecnico","cultura","aprovados","contratados"];
+        const ETAPA_LABELS = d.etapas.map(e => e.etapa);
+        function etapasDeVaga(v) {
+            return ETAPA_KEYS.map((k, i) => ({ etapa: ETAPA_LABELS[i] || k, candidatos: v.etapas[k] || 0 }));
+        }
+        const pillsEl = document.getElementById("funilPills");
+        if (d.vagasHistorico && d.vagasHistorico.length > 0 && pillsEl) {
+            let html = `<span class="funil-pill funil-pill-geral ativo" id="pill-geral"
+                onclick="renderFunil(window._funilAgregado);document.querySelectorAll('.funil-pill').forEach(p=>p.classList.remove('ativo'));this.classList.add('ativo')">
+                Geral</span>`;
+            html += d.vagasHistorico.map(v =>
+                `<span class="funil-pill" data-id="${v.id}"
+                    onclick="renderFunil(window._funilVagas['${v.id}']);document.querySelectorAll('.funil-pill').forEach(p=>p.classList.remove('ativo'));this.classList.add('ativo')">
+                    ${v.nome}</span>`
+            ).join("");
+            pillsEl.innerHTML = html;
+            window._funilAgregado = d.etapas;
+            window._funilVagas = {};
+            d.vagasHistorico.forEach(v => { window._funilVagas[v.id] = etapasDeVaga(v); });
+        }
+
+        // Pills de reprova (mesmo layout, estado independente)
+        const reprovaEl = document.getElementById("reprovaPills");
+        if (d.vagasHistorico && d.vagasHistorico.length > 0 && reprovaEl) {
+            window._reprovaAgregado = d.etapas;
+            window._reprovaVagas = {};
+            d.vagasHistorico.forEach(v => { window._reprovaVagas[v.id] = etapasDeVaga(v); });
+            let rHtml = `<span class="funil-pill funil-pill-geral ativo" id="reprova-pill-geral"
+                onclick="renderReprova(window._reprovaAgregado);document.querySelectorAll('#reprovaPills .funil-pill').forEach(p=>p.classList.remove('ativo'));this.classList.add('ativo')">
+                Geral</span>`;
+            rHtml += d.vagasHistorico.map(v =>
+                `<span class="funil-pill" data-id="${v.id}"
+                    onclick="renderReprova(window._reprovaVagas['${v.id}']);document.querySelectorAll('#reprovaPills .funil-pill').forEach(p=>p.classList.remove('ativo'));this.classList.add('ativo')">
+                    ${v.nome}</span>`
+            ).join("");
+            reprovaEl.innerHTML = rHtml;
+        }
+    }
+
     // Ranking vagas
-    const maxCand = Math.max(...d.rankingVagas.map(v => v.candidaturas));
+    const maxCand = Math.max(...d.rankingVagas.map(v => v.candidaturas), 1);
+    // Tabela de status das vagas
+    if (d.vagasHistorico && d.vagasHistorico.length > 0) {
+        const hoje = new Date();
+        document.getElementById("tblVagas").innerHTML = d.vagasHistorico.map(function(v) {
+            const aberta  = new Date(v.abertaEm);
+            const refDate = v.fechadaEm ? new Date(v.fechadaEm) : hoje;
+            const diasAberta = Math.round((refDate - aberta) / 86400000);
+            const filled     = v.instancias ? v.instancias.filter(i => i.status === "fechada").length : v.etapas.contratados;
+            const pctProg    = Math.round(filled / v.vagasMeta * 100);
+            const slaPct     = diasAberta / v.slaAlvo;
+            const slaCls     = slaPct <= 0.75 ? "ok" : slaPct <= 1.0 ? "warn" : "bad";
+            const slaLbl     = slaPct <= 0.75 ? "No prazo" : slaPct <= 1.0 ? "Atenção" : "Fora do SLA";
+            const statusCls  = v.status;
+            const statusLbl  = { aberta:"Em andamento", fechada:"Fechada", congelada:"Congelada", cancelada:"Cancelada" }[v.status] || v.status;
+            const mesP       = encodeURIComponent(mesAtivo);
+            const instCount  = v.instancias ? v.instancias.length : 1;
+            const instLabel  = instCount > 1 ? ' <span style="font-size:0.65rem;color:var(--text-3);font-weight:400;">(' + instCount + ' vagas)</span>' : '';
+            return '<tr onclick="abrirModalInstancias(\'' + v.id + '\')" style="cursor:pointer;">' +
+                '<td><div class="vaga-nome">' + v.nome + instLabel + '</div><div class="vaga-rec">' + v.recrutador + '</div></td>' +
+                '<td><div class="vaga-prog">' +
+                    '<div class="vaga-prog-bar"><div class="vaga-prog-fill" style="width:' + Math.min(pctProg,100) + '%;"></div></div>' +
+                    '<span class="vaga-prog-lbl">' + filled + '/' + v.vagasMeta + '</span>' +
+                '</div></td>' +
+                '<td style="font-weight:600;color:var(--text)">' + v.candidaturasTotal + '</td>' +
+                '<td style="font-weight:600;color:var(--text)">' + diasAberta + 'd <span style="font-size:0.68rem;color:var(--text-3);font-weight:400;">/ SLA ' + v.slaAlvo + 'd</span></td>' +
+                '<td><span class="sla-dot ' + slaCls + '"></span><span style="font-size:0.72rem;color:var(--text-2)">' + slaLbl + '</span></td>' +
+                '<td><span class="status-pill ' + statusCls + '">' + statusLbl + '</span></td>' +
+                '</tr>';
+        }).join("");
+    }
+
+    const mesParam = encodeURIComponent(mesAtivo);
     document.getElementById("tblRanking").innerHTML =
         `<thead><tr><th>#</th><th>Vaga</th><th style="text-align:right">Candidaturas</th></tr></thead><tbody>` +
-        d.rankingVagas.map((v, i) =>
-            `<tr>
+        d.rankingVagas.map((v, i) => {
+            const hist = d.vagasHistorico ? d.vagasHistorico.find(h => h.nome === v.vaga) : null;
+            const link = hist ? `<span onclick="abrirModalInstancias('${hist.id}')" style="color:var(--green);text-decoration:none;font-weight:600;cursor:pointer;" title="Ver SLA por vaga">${v.vaga}</span>` : v.vaga;
+            return `<tr>
                <td style="color:var(--text-3);font-weight:600;width:20px">${i+1}</td>
-               <td style="color:var(--text)">${v.vaga}<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(v.candidaturas/maxCand*100)}%"></div></div></td>
+               <td style="color:var(--text)">${link}<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(v.candidaturas/maxCand*100)}%"></div></div></td>
                <td style="text-align:right;font-weight:700;color:var(--green-mid)">${v.candidaturas}</td>
-             </tr>`).join("") + `</tbody>`;
+             </tr>`;
+        }).join("") + `</tbody>`;
 
     // Recrutadores
     const recsSLA = d.recrutadores
@@ -846,12 +1468,12 @@ function renderizar() {
         recsSLA.map((r, i) =>
             `<tr>
                <td style="color:var(--text-3);font-weight:600;width:20px">${i+1}</td>
-               <td style="color:var(--text)">${r.nome}<div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(r.metrica/maxSLA*100)}%"></div></div></td>
+               <td style="color:var(--text)"><span onclick="abrirModalRecrutador('${r.nome}')" style="cursor:pointer;color:var(--green);font-weight:600;text-decoration:underline;text-underline-offset:2px;">${r.nome}</span><div class="mini-bar"><div class="mini-bar-fill" style="width:${Math.round(r.metrica/maxSLA*100)}%"></div></div></td>
                <td style="text-align:right;font-weight:700;color:var(--green-mid)">${r.metrica}</td>
              </tr>`).join("") + `</tbody>`;
 
     // Motivos de recusa
-    if (d.recusas) {
+    if (d.recusas && d.recusas.motivos.length > 0) {
         const rec          = d.recusas;
         const totalRecusas = rec.motivos.reduce((s, m) => s + m.recusaram, 0);
         const taxaGeral    = rec.abordados > 0 ? Math.round(totalRecusas / rec.abordados * 100) : 0;
@@ -929,11 +1551,194 @@ function renderizar() {
                   </tr>`;
             }).join("") + `</tbody>`;
     }
+
+    // Pace prediction card
+    const paceCard = document.getElementById("cardPacePrevisao");
+    if (isMesAtual && paceCard) {
+        paceCard.style.display = "";
+        const { firstDay: fp, lastDay: lp, hoje: hp } = getMesInfo();
+        const diasTotais    = Math.round((lp - fp) / 86400000) + 1;
+        const diasPassados  = Math.max(1, Math.round((hp - fp) / 86400000) + 1);
+        const diasRestantes = Math.max(0, diasTotais - diasPassados);
+        const esperadoHoje  = Math.round(d.meta.total * diasPassados / diasTotais);
+        const real          = d.meta.concluida;
+        const diff          = real - esperadoHoje;
+        const vagasFaltam   = Math.max(0, d.meta.total - real);
+        const entrevistasNecessarias = vagasFaltam * 3;
+        const diffCor   = diff >= 0 ? "var(--green)" : "var(--red)";
+        const diffLabel = diff > 0 ? `+${diff} à frente do ritmo` : diff === 0 ? "exatamente no ritmo" : `${Math.abs(diff)} abaixo do esperado`;
+        document.getElementById("paceMesLabelPrevisao").textContent = labelMesLong(mesAtivo);
+        document.getElementById("pacePrevisaoBody").innerHTML = `
+            <div class="pace-prev-grid">
+                <div class="pace-prev-stat">
+                    <div class="pace-prev-val">${diasPassados}<span style="font-size:0.9rem;font-weight:500;color:var(--text-3)"> / ${diasTotais}</span></div>
+                    <div class="pace-prev-lbl">dias passados do mês</div>
+                </div>
+                <div class="pace-prev-stat">
+                    <div class="pace-prev-val" style="color:var(--text-2)">${esperadoHoje}</div>
+                    <div class="pace-prev-lbl">contratações esperadas até hoje</div>
+                </div>
+                <div class="pace-prev-stat">
+                    <div class="pace-prev-val" style="color:${diffCor}">${real}</div>
+                    <div class="pace-prev-lbl">contratações realizadas<br><span style="font-size:0.6rem;font-weight:700;color:${diffCor}">${diffLabel}</span></div>
+                </div>
+            </div>
+            <div class="pace-prev-box">
+                <div class="pace-prev-box-title">Para bater a meta nos ${diasRestantes} dia(s) restantes:</div>
+                <div class="pace-prev-needed">
+                    <div class="pace-prev-needed-item">
+                        <div class="pace-prev-needed-val">${vagasFaltam}</div>
+                        <div class="pace-prev-needed-lbl">contratações faltando</div>
+                    </div>
+                    <div class="pace-prev-needed-item">
+                        <div class="pace-prev-needed-val">${entrevistasNecessarias}</div>
+                        <div class="pace-prev-needed-lbl">entrevistas estimadas<br><span style="font-size:0.55rem;color:var(--text-3)">(~3 por contratação)</span></div>
+                    </div>
+                    <div class="pace-prev-needed-item">
+                        <div class="pace-prev-needed-val">${diasRestantes > 0 ? (vagasFaltam / diasRestantes).toFixed(1) : "—"}</div>
+                        <div class="pace-prev-needed-lbl">contratações/dia necessárias</div>
+                    </div>
+                </div>
+            </div>`;
+    } else if (paceCard) {
+        paceCard.style.display = "none";
+    }
+}
+
+// ─── Modal ─────────────────────────────────────────────────────────
+function abrirModal(tipo) {
+    const d = DADOS[mesAtivo];
+    if (!d || !d.vagasDetalhes) return;
+    const lista = d.vagasDetalhes[tipo] || [];
+    const titulos = { abertas:"Vagas em Aberto", fechadas:"Vagas Fechadas", congeladas:"Vagas Congeladas", canceladas:"Vagas Canceladas" };
+    let thead = "", tbody = "";
+    if (tipo === "abertas") {
+        thead = `<tr><th>Vaga</th><th>Recrutador(a)</th><th>Aberta em</th><th>SLA Alvo</th><th style="text-align:center">Cadeiras</th></tr>`;
+        tbody = lista.map(v => `<tr><td>${v.nome}</td><td>${v.recrutador}</td><td>${v.abertura}</td><td>${v.slaAlvo}d</td><td style="text-align:center;font-weight:700;color:var(--green-mid)">${v.cadeiras != null ? v.cadeiras : "–"}</td></tr>`).join("");
+    } else if (tipo === "fechadas") {
+        thead = `<tr><th>Vaga</th><th>Recrutador(a)</th><th>Fechada em</th><th>Dias</th></tr>`;
+        tbody = lista.map(v => {
+            const cor = v.dias <= 25 ? "verde" : v.dias <= 35 ? "amarelo" : "vermelho";
+            return `<tr><td>${v.nome}</td><td>${v.recrutador}</td><td>${v.fechamento}</td><td><span class="modal-tag ${cor}">${v.dias}d</span></td></tr>`;
+        }).join("");
+    } else if (tipo === "congeladas") {
+        thead = `<tr><th>Vaga</th><th>Recrutador(a)</th><th>Congelada em</th><th>Motivo</th></tr>`;
+        tbody = lista.map(v => `<tr><td>${v.nome}</td><td>${v.recrutador}</td><td>${v.congelamento}</td><td style="color:var(--text-2)">${v.motivo}</td></tr>`).join("");
+    } else {
+        thead = `<tr><th>Vaga</th><th>Recrutador(a)</th><th>Cancelada em</th><th>Motivo</th></tr>`;
+        tbody = lista.map(v => `<tr><td>${v.nome}</td><td>${v.recrutador}</td><td>${v.cancelamento}</td><td style="color:var(--text-2)">${v.motivo}</td></tr>`).join("");
+    }
+    const cols  = tipo === "abertas" ? 5 : 4;
+    const empty = lista.length === 0 ? `<tr><td colspan="${cols}" style="text-align:center;color:var(--text-3);padding:20px;">Nenhuma vaga nesta categoria</td></tr>` : tbody;
+    document.getElementById("modalTitle").textContent = titulos[tipo] + ` (${lista.length})`;
+    document.getElementById("modalBody").innerHTML = `<table class="modal-table"><thead>${thead}</thead><tbody>${empty}</tbody></table>`;
+    document.getElementById("modalOverlay").classList.add("open");
+}
+function fecharModal() { document.getElementById("modalOverlay").classList.remove("open"); }
+
+function abrirModalInstancias(vagaId) {
+    const d = DADOS[mesAtivo];
+    if (!d || !d.vagasHistorico) return;
+    const v = d.vagasHistorico.find(x => x.id === vagaId);
+    if (!v) return;
+    const hoje = new Date();
+    let rows = "";
+    if (v.instancias && v.instancias.length > 0) {
+        rows = v.instancias.map((inst, i) => {
+            const dias = inst.status === "fechada" ? inst.dias :
+                Math.round((hoje - new Date(inst.abertaEm)) / 86400000);
+            const slaPct = dias / v.slaAlvo;
+            const slaCls = slaPct <= 0.75 ? "verde" : slaPct <= 1.0 ? "amarelo" : "vermelho";
+            const slaLbl = slaPct <= 0.75 ? "No prazo" : slaPct <= 1.0 ? "Atenção" : "Fora do SLA";
+            const dtFecha = inst.fechadaEm || "—";
+            const stPill  = inst.status === "fechada"
+                ? '<span class="status-pill fechada">Fechada</span>'
+                : '<span class="status-pill aberta">Em andamento</span>';
+            return `<tr>
+                <td style="font-weight:700;color:var(--text-2)">#${i+1}</td>
+                <td>${inst.abertaEm}</td>
+                <td>${dtFecha}</td>
+                <td style="font-weight:600">${dias}d <span style="font-size:0.65rem;color:var(--text-3)">/ ${v.slaAlvo}d</span></td>
+                <td><span class="modal-tag ${slaCls}">${slaLbl}</span></td>
+                <td>${stPill}</td>
+            </tr>`;
+        }).join("");
+    } else {
+        rows = `<tr><td colspan="6" style="text-align:center;color:var(--text-3);padding:20px;">Nenhum dado de instância disponível</td></tr>`;
+    }
+    const fechadasInst = v.instancias ? v.instancias.filter(i => i.status === "fechada").length : 0;
+    const thead = `<tr><th>#</th><th>Aberta em</th><th>Fechada em</th><th>Dias</th><th>SLA</th><th>Status</th></tr>`;
+    document.getElementById("modalTitle").textContent = v.nome + " — " + v.vagasMeta + " vaga(s) · " + fechadasInst + " fechada(s)";
+    document.getElementById("modalBody").innerHTML = `<table class="modal-table"><thead>${thead}</thead><tbody>${rows}</tbody></table>`;
+    document.getElementById("modalOverlay").classList.add("open");
+}
+
+function abrirModalRecrutador(nome) {
+    const d = DADOS[mesAtivo];
+    if (!d) return;
+    const vagas = d.vagasHistorico ? d.vagasHistorico.filter(v => v.recrutador === nome) : [];
+    const meta = d.meta ? d.meta.total : 0;
+    const teamConcluida = d.meta ? d.meta.concluida : 0;
+    let fechadas = 0, dentroSLA = 0;
+    const rows = [];
+    vagas.forEach(v => {
+        if (v.instancias) {
+            v.instancias.forEach((inst, ii) => {
+                if (inst.status === "fechada") {
+                    fechadas++;
+                    const sp = inst.dias / v.slaAlvo;
+                    if (sp <= 1.0) dentroSLA++;
+                    const cor = sp <= 0.75 ? "verde" : sp <= 1.0 ? "amarelo" : "vermelho";
+                    const lbl = sp <= 0.75 ? "No prazo" : sp <= 1.0 ? "Atenção" : "Fora do SLA";
+                    const nomeV = v.instancias.length > 1 ? `${v.nome} #${ii+1}` : v.nome;
+                    rows.push(`<tr><td style="font-weight:500">${nomeV}</td><td>${inst.abertaEm}</td><td>${inst.fechadaEm}</td><td style="font-weight:600">${inst.dias}d <span style="font-size:0.65rem;color:var(--text-3)">/ ${v.slaAlvo}d</span></td><td><span class="modal-tag ${cor}">${lbl}</span></td></tr>`);
+                }
+            });
+        }
+    });
+    const faltamParaMeta = Math.max(0, meta - teamConcluida);
+    const pctContrib = teamConcluida > 0 ? Math.round(fechadas / teamConcluida * 100) : 0;
+    const sumario = `<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:72px;text-align:center;padding:10px 8px;background:var(--green-bg);border:1px solid #c0e4ce;border-radius:8px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--green)">${fechadas}</div>
+            <div style="font-size:0.62rem;color:var(--text-2);margin-top:2px">vagas fechadas</div>
+        </div>
+        <div style="flex:1;min-width:72px;text-align:center;padding:10px 8px;background:var(--green-bg);border:1px solid #c0e4ce;border-radius:8px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--green)">${dentroSLA}</div>
+            <div style="font-size:0.62rem;color:var(--text-2);margin-top:2px">dentro do SLA</div>
+        </div>
+        <div style="flex:1;min-width:72px;text-align:center;padding:10px 8px;background:#f5f7fa;border:1px solid var(--border);border-radius:8px;">
+            <div style="font-size:1.6rem;font-weight:800;color:var(--text)">${pctContrib}%</div>
+            <div style="font-size:0.62rem;color:var(--text-2);margin-top:2px">do total do time</div>
+        </div>
+    </div>
+    <div style="font-size:0.72rem;color:var(--text-2);margin-bottom:12px;padding:8px 10px;background:var(--bg);border-radius:6px;">
+        Meta do time: <strong>${meta} vagas</strong> &nbsp;·&nbsp; Concluídas: <strong>${teamConcluida}</strong> &nbsp;·&nbsp; Faltam para a meta: <strong style="color:${faltamParaMeta > 0 ? 'var(--red)' : 'var(--green)'}">${faltamParaMeta}</strong>
+    </div>`;
+    const thead = `<tr><th>Vaga</th><th>Aberta em</th><th>Fechada em</th><th>Dias</th><th>SLA</th></tr>`;
+    const empty = rows.length === 0
+        ? `<tr><td colspan="5" style="text-align:center;color:var(--text-3);padding:20px;">Nenhuma vaga fechada ainda</td></tr>`
+        : rows.join("");
+    document.getElementById("modalTitle").textContent = `${nome} — vagas fechadas`;
+    document.getElementById("modalBody").innerHTML = sumario + `<table class="modal-table"><thead>${thead}</thead><tbody>${empty}</tbody></table>`;
+    document.getElementById("modalOverlay").classList.add("open");
 }
 
 // ─── Init ──────────────────────────────────────────────────────────
 updateDateInputs();
 renderizar();
 </script>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">—</span>
+            <button class="modal-close" onclick="fecharModal()">✕</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
 </body>
 </html>
