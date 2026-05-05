@@ -47,11 +47,19 @@
         }
 
         .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .logo:hover .logo-back { opacity: 1; transform: translateX(0); }
+        .logo-back {
+            font-size: 0.75rem; color: var(--green); opacity: 0;
+            transform: translateX(4px); transition: opacity 0.2s, transform 0.2s;
+            font-weight: 600;
+        }
         .logo-mark {
             width: 30px; height: 30px; background: var(--green); border-radius: 7px;
             display: flex; align-items: center; justify-content: center;
             color: white; font-weight: 700; font-size: 0.85rem; letter-spacing: -0.5px; flex-shrink: 0;
+            transition: background 0.2s;
         }
+        .logo:hover .logo-mark { background: var(--green-mid, #2d7a50); }
         .logo-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
 
         .nav-period { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -748,7 +756,8 @@ const DADOS = {
 
 <!-- ══════════════════════════════ HEADER ══ -->
 <header>
-    <a class="logo" href="#">
+    <a class="logo" href="index.html" title="Voltar à página inicial">
+        <span class="logo-back">←</span>
         <div class="logo-mark">rh</div>
         <span class="logo-name">recrutamento</span>
     </a>
@@ -1736,4 +1745,15 @@ renderizar();
 </script>
 
 <!-- Modal -->
-<div class="modal-overlay" id="modalOverl
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)fecharModal()">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span class="modal-title" id="modalTitle">—</span>
+            <button class="modal-close" onclick="fecharModal()">✕</button>
+        </div>
+        <div id="modalBody"></div>
+    </div>
+</div>
+
+</body>
+</html>
