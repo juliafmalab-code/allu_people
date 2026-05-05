@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda da Semana — Allu People</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green:     #1a5c38;
+    --green-mid: #2d7a50;
+    --green-bg:  #eaf2ed;
+    --text:      #0f1c14;
+    --text-2:    #4a6358;
+    --text-3:    #9eabbe;
+    --border:    #e4e9ec;
+    --bg:        #f0f3f5;
+    --card:      #ffffff;
+  }
+
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  header {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .logo:hover .logo-back { opacity: 1; transform: translateX(0); }
+  .logo-back { font-size: 0.75rem; color: var(--green); opacity: 0; transform: translateX(4px); transition: opacity 0.2s, transform 0.2s; font-weight: 600; }
+  .logo-mark { width: 30px; height: 30px; background: var(--green); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 0.85rem; letter-spacing: -0.5px; flex-shrink: 0; transition: background 0.2s; }
+  .logo:hover .logo-mark { background: var(--green-mid); }
+  .logo-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+  .header-title { font-size: 0.8rem; color: var(--text-3); font-weight: 500; margin-left: 4px; }
+
+  main { padding: 32px; max-width: 1200px; margin: 0 auto; }
+
+  .page-header { margin-bottom: 28px; }
+  .page-header h1 { font-size: 1.4rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; margin-bottom: 4px; }
+  .page-header p { font-size: 0.85rem; color: var(--text-2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.6rem; font-weight: 800; letter-spacing: 0.9px; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 20px; background: var(--green-bg); color: var(--green);
+    margin-bottom: 10px;
+  }
+  .badge .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+  /* Totals */
+  .totals-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  .total-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; }
+  .total-icon { width: 38px; height: 38px; background: var(--green-bg); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .total-label { font-size: 0.7rem; color: var(--text-2); font-weight: 500; margin-bottom: 2px; }
+  .total-value { font-size: 1.25rem; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+
+  /* Grid de vagas */
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+
+  .vaga-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+
+  .vaga-header { padding: 18px 20px 14px; border-bottom: 1px solid var(--border); }
+  .vaga-title { font-size: 1.1rem; font-weight: 700; color: var(--text); letter-spacing: -0.2px; margin-top: 6px; }
+
+  .etapas { padding: 14px 0 4px; }
+
+  .etapa { padding: 12px 20px 14px; border-bottom: 1px solid var(--border); }
+  .etapa:last-child { border-bottom: none; }
+
+  .etapa-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+  .etapa-label-wrap { display: flex; align-items: center; gap: 8px; }
+  .etapa-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-hr     { background: #6b7fa3; }
+  .dot-role   { background: #2d7a50; }
+  .dot-cult   { background: var(--green); }
+
+  .etapa-nome { font-size: 0.8rem; font-weight: 700; color: var(--text); }
+  .etapa-desc { font-size: 0.68rem; color: var(--text-3); font-weight: 400; margin-top: 1px; }
+
+  .etapa-count { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
+  .count-hr   { color: #6b7fa3; }
+  .count-role { color: #2d7a50; }
+  .count-cult { color: var(--green); }
+  .count-zero { color: var(--text-3); font-size: 1rem; }
+
+  .etapa-bar-wrap { height: 3px; background: var(--border); border-radius: 4px; margin-bottom: 10px; overflow: hidden; }
+  .etapa-bar { height: 100%; border-radius: 4px; }
+  .bar-hr   { background: #b0bfde; }
+  .bar-role { background: #4aab78; }
+  .bar-cult { background: var(--green); }
+
+  .candidatos { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .candidatos li {
+    font-size: 0.7rem; color: var(--text-2); font-weight: 500;
+    padding: 4px 8px; border-radius: 6px; background: var(--bg);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .candidatos li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+  .candidatos .dia { font-size: 0.6rem; color: var(--text-3); font-weight: 600; margin-left: auto; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .vazia { font-size: 0.72rem; color: var(--text-3); font-style: italic; padding: 4px 0; }
+
+  @media (max-width: 900px) {
+    .grid { grid-template-columns: 1fr; }
+    .totals-row { grid-template-columns: repeat(2, 1fr); }
+    main { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="logo" href="index.html" title="Voltar à página inicial">
+    <span class="logo-back">←</span>
+    <div class="logo-mark">rh</div>
+    <span class="logo-name">allu people</span>
+  </a>
+  <span class="header-title">/ Agenda da Semana</span>
+</header>
+
+<main>
+
+  <div class="page-header">
+    <div class="badge"><span class="dot"></span>4 a 8 de maio de 2026</div>
+    <h1>Entrevistas da Semana</h1>
+    <p>HR Interview, Roleplay e Cultura — por vaga: SDR, Closer e Farmer</p>
+  </div>
+
+  <div class="totals-row">
+    <div class="total-card">
+      <div class="total-icon">🗓️</div>
+      <div>
+        <div class="total-label">Total de entrevistas</div>
+        <div class="total-value">43</div>
+      </div>
+    </div>
+    <div class="total-card">
+      <div class="total-icon">🎙️</div>
+      <div>
+        <div class="total-label">HR Interview</div>
+        <div class="total-value">31</div>
+      </div>
+    </div>
+    <div class="total-card">
+      <div class="total-icon">🎭</div>
+      <div>
+        <div class="total-label">Roleplay</div>
+        <div class="total-value">10</div>
+      </div>
+    </div>
+    <div class="total-card">
+      <div class="total-icon">🤝</div>
+      <div>
+        <div class="total-label">Cultura</div>
+        <div class="total-value">2</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- SDR -->
+    <div class="vaga-card">
+      <div class="vaga-header">
+        <div class="badge"><span class="dot"></span>SDR</div>
+        <div class="vaga-title">SDR</div>
+      </div>
+      <div class="etapas">
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-hr"></div>
+              <div>
+                <div class="etapa-nome">HR Interview</div>
+                <div class="etapa-desc">Entrevista com o RH</div>
+              </div>
+            </div>
+            <div class="etapa-count count-hr">9</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-hr" style="width:45%"></div></div>
+          <ul class="candidatos">
+            <li>Fábio Moreira <span class="dia">ter</span></li>
+            <li>Thalita Garcia Gaia <span class="dia">qua</span></li>
+            <li>Emilly Pereira Souza <span class="dia">qua</span></li>
+            <li>Marco Túlio Guimarães <span class="dia">qua</span></li>
+            <li>Fernando Reyes <span class="dia">qua</span></li>
+            <li>Deborah Moura Cardoso <span class="dia">qua</span></li>
+            <li>Leandro Rodrigues Vital <span class="dia">qua</span></li>
+            <li>Vitoria Cristina <span class="dia">qui</span></li>
+            <li>Henrique Dourado Cavalcante <span class="dia">sex</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-role"></div>
+              <div>
+                <div class="etapa-nome">Roleplay</div>
+                <div class="etapa-desc">Roleplay com os gestores</div>
+              </div>
+            </div>
+            <div class="etapa-count count-role">1</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-role" style="width:14%"></div></div>
+          <ul class="candidatos">
+            <li>Clara Rajão <span class="dia">seg</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-cult"></div>
+              <div>
+                <div class="etapa-nome">Cultura</div>
+                <div class="etapa-desc">Fit cultural com os sócios da allu</div>
+              </div>
+            </div>
+            <div class="etapa-count count-cult">1</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-cult" style="width:50%"></div></div>
+          <ul class="candidatos">
+            <li>Clara Rajão Liboni Passos <span class="dia">ter</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Closer -->
+    <div class="vaga-card">
+      <div class="vaga-header">
+        <div class="badge"><span class="dot"></span>Closer</div>
+        <div class="vaga-title">Closer</div>
+      </div>
+      <div class="etapas">
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-hr"></div>
+              <div>
+                <div class="etapa-nome">HR Interview</div>
+                <div class="etapa-desc">Entrevista com o RH</div>
+              </div>
+            </div>
+            <div class="etapa-count count-hr">20</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-hr" style="width:100%"></div></div>
+          <ul class="candidatos">
+            <li>Bruno Arantes Kahey <span class="dia">seg</span></li>
+            <li>Israel Henriques Pantuzzo <span class="dia">seg</span></li>
+            <li>Leandro Magalhães R. da Costa <span class="dia">seg</span></li>
+            <li>Marcos Assis <span class="dia">ter</span></li>
+            <li>André Alvarenga <span class="dia">ter</span></li>
+            <li>Paulo Marques <span class="dia">ter</span></li>
+            <li>Murilo Henrique <span class="dia">ter</span></li>
+            <li>Neliane Lopes <span class="dia">ter</span></li>
+            <li>Fernanda Perdomo <span class="dia">ter</span></li>
+            <li>Antônio Arnaldo de Melo Jr. <span class="dia">ter</span></li>
+            <li>Danielle Rocha Dolabela <span class="dia">ter</span></li>
+            <li>João Pedro Braga de Almeida <span class="dia">ter</span></li>
+            <li>Carol Felizardo <span class="dia">ter</span></li>
+            <li>Alan Costa <span class="dia">ter</span></li>
+            <li>Aline Minardi <span class="dia">qua</span></li>
+            <li>Hudson Vilaça <span class="dia">qua</span></li>
+            <li>Pedro Henrique <span class="dia">qua</span></li>
+            <li>Lorena Aparecida Alves <span class="dia">qua</span></li>
+            <li>Guilherme Borges <span class="dia">qua</span></li>
+            <li>Camilla Gabriella Castro <span class="dia">qua</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-role"></div>
+              <div>
+                <div class="etapa-nome">Roleplay</div>
+                <div class="etapa-desc">Roleplay com os gestores</div>
+              </div>
+            </div>
+            <div class="etapa-count count-role">7</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-role" style="width:100%"></div></div>
+          <ul class="candidatos">
+            <li>Luiz Bernardes <span class="dia">seg</span></li>
+            <li>Bruno Arantes <span class="dia">ter</span></li>
+            <li>Fernanda Perdomo <span class="dia">qua</span></li>
+            <li>Rafael Patrick <span class="dia">qui</span></li>
+            <li>Cristiano Antonio <span class="dia">qui</span></li>
+            <li>Paulo Marques <span class="dia">sex</span></li>
+            <li>Antônio Arnaldo de Melo Jr. <span class="dia">sex</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-cult"></div>
+              <div>
+                <div class="etapa-nome">Cultura</div>
+                <div class="etapa-desc">Fit cultural com os sócios da allu</div>
+              </div>
+            </div>
+            <div class="etapa-count count-cult">1</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-cult" style="width:50%"></div></div>
+          <ul class="candidatos">
+            <li>Luiz Bernardes <span class="dia">ter</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Farmer -->
+    <div class="vaga-card">
+      <div class="vaga-header">
+        <div class="badge"><span class="dot"></span>Farmer</div>
+        <div class="vaga-title">Farmer</div>
+      </div>
+      <div class="etapas">
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-hr"></div>
+              <div>
+                <div class="etapa-nome">HR Interview</div>
+                <div class="etapa-desc">Entrevista com o RH</div>
+              </div>
+            </div>
+            <div class="etapa-count count-hr">2</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-hr" style="width:10%"></div></div>
+          <ul class="candidatos">
+            <li>Alberto Garajal Vieira <span class="dia">ter</span></li>
+            <li>Guilherme Borges <span class="dia">qua</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-role"></div>
+              <div>
+                <div class="etapa-nome">Roleplay</div>
+                <div class="etapa-desc">Roleplay com os gestores</div>
+              </div>
+            </div>
+            <div class="etapa-count count-role">2</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-role" style="width:29%"></div></div>
+          <ul class="candidatos">
+            <li>Rubens Meireles <span class="dia">ter</span></li>
+            <li>Alberto Garajal Vieira <span class="dia">qui</span></li>
+          </ul>
+        </div>
+
+        <div class="etapa">
+          <div class="etapa-top">
+            <div class="etapa-label-wrap">
+              <div class="etapa-dot dot-cult"></div>
+              <div>
+                <div class="etapa-nome">Cultura</div>
+                <div class="etapa-desc">Fit cultural com os sócios da allu</div>
+              </div>
+            </div>
+            <div class="etapa-count count-zero">—</div>
+          </div>
+          <div class="etapa-bar-wrap"><div class="etapa-bar bar-cult" style="width:0%"></div></div>
+          <p class="vazia">Nenhuma entrevista agendada</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+</body>
+</html>
