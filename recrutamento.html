@@ -680,12 +680,23 @@ const DADOS = {
         recusas: {
             abordados: 3066,
             motivos: [
-                { motivo: "Sem fit",             recusaram: 839 },
-                { motivo: "Reprovado em testes", recusaram: 450 },
-                { motivo: "Outros motivos",      recusaram: 700 },
-                { motivo: "Realocados em outras vagas", recusaram: 84 },
-                { motivo: "Localidade",          recusaram: 63  },
-                { motivo: "Cultura",             recusaram: 23  }
+                { motivo: "Sem fit",             recusaram: 931 },
+                { motivo: "Reprovado em testes", recusaram: 685 },
+                { motivo: "Realocados/Antigos",  recusaram: 137 },
+                { motivo: "Localidade",          recusaram: 105 },
+                { motivo: "Cultura",             recusaram: 57  },
+                { motivo: "No-show / Desistência", recusaram: 54 },
+                { motivo: "Experiência",         recusaram: 22  },
+                { motivo: "Outros motivos",      recusaram: 166, detalhes: [
+                    { motivo: "Falta de match técnico",            qtd: 6  },
+                    { motivo: "Perfil de marketing",                qtd: 3  },
+                    { motivo: "Não atingiu pontuação mínima",       qtd: 3  },
+                    { motivo: "Não qualificado na entrevista",      qtd: 5  },
+                    { motivo: "Declinou do processo",               qtd: 5  },
+                    { motivo: "Não passou no role play",            qtd: 4  },
+                    { motivo: "Sem experiência em vendas",          qtd: 2  },
+                    { motivo: "Demais justificativas pontuais",     qtd: 138 }
+                ] }
             ]
         }
     },
@@ -1502,7 +1513,7 @@ function renderizar() {
                <td style="text-align:right;font-weight:700;color:var(--green-mid)">${r.metrica}</td>
              </tr>`).join("") + `</tbody>`;
 
-    // Motivos de recusa
+    // Motivos de reprovação
     if (d.recusas && d.recusas.motivos.length > 0) {
         const rec          = d.recusas;
         const totalRecusas = rec.motivos.reduce((s, m) => s + m.recusaram, 0);
@@ -1511,10 +1522,10 @@ function renderizar() {
 
         document.getElementById("recAbordados").textContent          = rec.abordados;
         document.getElementById("recTotal").textContent              = totalRecusas;
-        document.getElementById("recTotalSub").textContent           = `${taxaGeral}% dos abordados recusaram`;
+        document.getElementById("recTotalSub").textContent           = `${taxaGeral}% das candidaturas reprovadas`;
         document.getElementById("recMotivoPrincipal").textContent    = principal.motivo;
         document.getElementById("recMotivoPrincipalSub").textContent =
-            `${principal.recusaram} recusas (${Math.round(principal.recusaram / rec.abordados * 100)}%)`;
+            `${principal.recusaram} reprovações (${Math.round(principal.recusaram / rec.abordados * 100)}%)`;
 
         const labels = rec.motivos.map(m => m.motivo);
         const pcts   = rec.motivos.map(m => +(m.recusaram / rec.abordados * 100).toFixed(1));
@@ -1526,7 +1537,24 @@ function renderizar() {
             data: { labels, datasets: [{ data: pcts, backgroundColor: cores, borderWidth: 0, borderRadius: 2 }] },
             options: {
                 indexAxis: "y",
-                plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.x}% dos abordados` } } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => ` ${ctx.parsed.x}% das candidaturas (${rec.motivos[ctx.dataIndex].recusaram} reprovações)`,
+                            afterBody: ctx => {
+                                const m = rec.motivos[ctx[0].dataIndex];
+                                if (m.detalhes && m.detalhes.length > 0) {
+                                    return ['', 'Detalhamento:'].concat(m.detalhes.map(d => `  • ${d.motivo}: ${d.qtd}`));
+                                }
+                                return [];
+                            }
+                        },
+                        bodyFont: { size: 11 },
+                        padding: 10,
+                        boxPadding: 4
+                    }
+                },
                 scales: {
                     x: { beginAtZero: true, max: 100, ticks: { callback: v => v+"%", color: "#9eabbe" }, grid: { color: "#eef1f6" }, border: { display: false } },
                     y: { grid: { display: false }, border: { display: false }, ticks: { color: "#6b7c93" } }
@@ -1567,7 +1595,7 @@ function renderizar() {
 
         const maxRec = Math.max(...rec.motivos.map(m => m.recusaram));
         document.getElementById("tblRecusas").innerHTML =
-            `<thead><tr><th>Motivo</th><th style="text-align:center">Recusas</th><th style="text-align:center">% abordados</th><th style="text-align:center">% recusas</th><th style="min-width:100px">Proporção</th></tr></thead><tbody>` +
+            `<thead><tr><th>Motivo</th><th style="text-align:center">Reprovações</th><th style="text-align:center">% candidaturas</th><th style="text-align:center">% reprovações</th><th style="min-width:100px">Proporção</th></tr></thead><tbody>` +
             rec.motivos.slice().sort((a,b) => b.recusaram - a.recusaram).map(m => {
                 const pctAbord = +(m.recusaram / rec.abordados * 100).toFixed(1);
                 const pctRec   = totalRecusas > 0 ? +(m.recusaram / totalRecusas * 100).toFixed(1) : 0;
