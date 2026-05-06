@@ -568,7 +568,7 @@ const DADOS = {
     "2026-05": {
         vagas: { abertas: 7, fechadas: 0, congeladas: 0, canceladas: 0 },
         candidaturas: { media: 438 },
-        sla: { dentro: 0, fora: 0 },
+        sla: { dentro: 12, fora: 6 },
         desligamentos: { total: 0, precoce: 0 },
         meta: {
             concluida: 3, total: 18,
@@ -582,14 +582,22 @@ const DADOS = {
                 { posicao: "Head/Gerente Sênior de Vendas", vagasMeta: 1, contratados: 0 }
             ]
         },
-        tempoMedioPorVaga: [],
+        tempoMedioPorVaga: [
+            { vaga: "SDR",                          dias: 35, slaAlvo: 30 },
+            { vaga: "Closer",                       dias: 6,  slaAlvo: 30 },
+            { vaga: "Farmer",                       dias: 6,  slaAlvo: 30 },
+            { vaga: "Sales Enablement Sênior",      dias: 6,  slaAlvo: 30 },
+            { vaga: "Coord./Supervisão de SDR",     dias: 0,  slaAlvo: 30 },
+            { vaga: "Supervisão de Farmer",         dias: 6,  slaAlvo: 30 },
+            { vaga: "Head/Gerente Sênior de Vendas", dias: 0,  slaAlvo: 45 }
+        ],
         etapas: [
-            { etapa: "Inscritos",    candidatos: 1853 },
-            { etapa: "Triados",      candidatos: 537  },
-            { etapa: "Inicial",      candidatos: 370  },
-            { etapa: "Case Tecnico", candidatos: 128  },
-            { etapa: "Cultura",      candidatos: 54   },
-            { etapa: "Aprovados",    candidatos: 17   },
+            { etapa: "Inscritos",    candidatos: 3066 },
+            { etapa: "Triados",      candidatos: 1150 },
+            { etapa: "Inicial",      candidatos: 613  },
+            { etapa: "Case Tecnico", candidatos: 243  },
+            { etapa: "Cultura",      candidatos: 115  },
+            { etapa: "Aprovados",    candidatos: 61   },
             { etapa: "Contratados",  candidatos: 44   }
         ],
         vagasDetalhes: {
@@ -607,9 +615,9 @@ const DADOS = {
         },
         vagasHistorico: [
             { id:"sdr-mai",      nome:"SDR",                     recrutador:"Júlia", status:"aberta", abertaEm:"2026-04-02", vagasMeta:6, slaAlvo:30, candidaturasTotal:1318,
-              etapas:{ inscritos:782, triados:191, inicial:203, caseTecnico:54, cultura:29, aprovados:4, contratados:27 },
+              etapas:{ inscritos:1318, triados:508, inicial:317, caseTecnico:114, cultura:60, aprovados:31, contratados:27 },
               origens:{ linkedin:980, indicacao:44, site:34, outros:260 },
-              observacao:"4 cadeiras novas + 2 realocadas de abril (6 total)",
+              observacao:"4 cadeiras novas + 2 realocadas de abril (6 total) — 2 cadeiras fora do SLA",
               instancias:[
                 {status:"aberta",abertaEm:"2026-04-02"},
                 {status:"aberta",abertaEm:"2026-04-09"},
@@ -619,9 +627,9 @@ const DADOS = {
                 {status:"aberta",abertaEm:"2026-05-01"}
               ] },
             { id:"closer-mai",   nome:"Closer",                  recrutador:"Lara / Ana", status:"aberta", abertaEm:"2026-05-01", vagasMeta:5, slaAlvo:30, candidaturasTotal:825,
-              etapas:{ inscritos:490, triados:150, inicial:84, caseTecnico:42, cultura:14, aprovados:9, contratados:7 },
+              etapas:{ inscritos:825, triados:306, inicial:156, caseTecnico:72, cultura:30, aprovados:16, contratados:7 },
               origens:{ linkedin:630, indicacao:27, site:20, outros:148 },
-              observacao:"2 cadeiras novas + 3 realocadas de abril (5 total)",
+              observacao:"2 cadeiras novas + 3 realocadas de abril (5 total) — 3 cadeiras fora do SLA",
               instancias:[
                 {status:"aberta",abertaEm:"2026-05-01"},
                 {status:"aberta",abertaEm:"2026-05-01"},
@@ -630,9 +638,9 @@ const DADOS = {
                 {status:"aberta",abertaEm:"2026-05-01"}
               ] },
             { id:"farmer-mai",   nome:"Farmer",                  recrutador:"Lara / Ana", status:"aberta", abertaEm:"2026-05-01", vagasMeta:3, slaAlvo:30, candidaturasTotal:649,
-              etapas:{ inscritos:393, triados:146, inicial:68, caseTecnico:24, cultura:9, aprovados:1, contratados:8 },
+              etapas:{ inscritos:649, triados:256, inicial:110, caseTecnico:42, cultura:18, aprovados:9, contratados:8 },
               origens:{ linkedin:518, indicacao:5, site:17, outros:109 },
-              observacao:"2 cadeiras novas + 1 realocada de abril (3 total)",
+              observacao:"2 cadeiras novas + 1 realocada de abril (3 total) — 1 cadeira fora do SLA",
               instancias:[
                 {status:"aberta",abertaEm:"2026-05-01"},
                 {status:"aberta",abertaEm:"2026-05-01"},
@@ -643,11 +651,11 @@ const DADOS = {
               origens:{ linkedin:8, indicacao:0, site:0, outros:0 },
               observacao:"", instancias:[] },
             { id:"csdr-mai",     nome:"Coord./Supervisão de SDR", recrutador:"A definir", status:"aberta", abertaEm:"2026-05-15", vagasMeta:1, slaAlvo:30, candidaturasTotal:171,
-              etapas:{ inscritos:127, triados:29, inicial:6, caseTecnico:4, cultura:0, aprovados:0, contratados:2 },
+              etapas:{ inscritos:171, triados:41, inicial:12, caseTecnico:6, cultura:2, aprovados:2, contratados:2 },
               origens:{ linkedin:144, indicacao:4, site:2, outros:21 },
               observacao:"Substituição da Lara — abertura prevista para 2ª quinzena.", instancias:[] },
             { id:"sf-mai",       nome:"Supervisão de Farmer",    recrutador:"A definir", status:"aberta", abertaEm:"2026-05-01", vagasMeta:1, slaAlvo:30, candidaturasTotal:95,
-              etapas:{ inscritos:53, triados:21, inicial:9, caseTecnico:4, cultura:2, aprovados:3, contratados:0 },
+              etapas:{ inscritos:95, triados:39, inicial:18, caseTecnico:9, cultura:5, aprovados:3, contratados:0 },
               origens:{ linkedin:79, indicacao:2, site:3, outros:11 },
               observacao:"", instancias:[] },
             { id:"hgv-mai",      nome:"Head/Gerente Sênior de Vendas (Franquia SP)", recrutador:"A definir", status:"aberta", abertaEm:"2026-05-25", vagasMeta:1, slaAlvo:45, candidaturasTotal:0,
@@ -670,7 +678,7 @@ const DADOS = {
             { nome: "Lara",  fechadas: 0, fechadasDentroSLA: 0 }
         ],
         recusas: {
-            abordados: 2158,
+            abordados: 3066,
             motivos: [
                 { motivo: "Sem fit",             recusaram: 839 },
                 { motivo: "Reprovado em testes", recusaram: 450 },
@@ -1010,17 +1018,17 @@ const DADOS = {
         <div id="pacePrevisaoBody"></div>
     </div>
 
-    <!-- ── MOTIVOS DE RECUSA ── -->
-    <div class="section-title">MOTIVOS DE RECUSA <span class="st-sub">— análise de declínios</span></div>
+    <!-- ── MOTIVOS DE REPROVAÇÃO ── -->
+    <div class="section-title">MOTIVOS DE REPROVAÇÃO <span class="st-sub">— análise de reprovações</span></div>
 
     <div class="recusa-kpi-grid">
         <div class="recusa-kpi">
-            <div class="rlbl">Candidatos Abordados</div>
+            <div class="rlbl">Candidaturas</div>
             <div class="rval" id="recAbordados">—</div>
             <div class="rsub">no período</div>
         </div>
         <div class="recusa-kpi">
-            <div class="rlbl">Total de Recusas</div>
+            <div class="rlbl">Total de Reprovações</div>
             <div class="rval" id="recTotal">—</div>
             <div class="rsub" id="recTotalSub">—</div>
         </div>
@@ -1033,7 +1041,7 @@ const DADOS = {
 
     <div class="charts-grid">
         <div class="card">
-            <h3>Taxa de recusa por motivo — mês atual (%)</h3>
+            <h3>Taxa de reprovação por motivo — mês atual (%)</h3>
             <canvas id="chartRecusaBar" height="260"></canvas>
         </div>
         <div class="card">
@@ -1043,7 +1051,7 @@ const DADOS = {
     </div>
 
     <div class="card" style="margin-top:14px;">
-        <h3>Detalhamento completo de recusas</h3>
+        <h3>Detalhamento completo de reprovações</h3>
         <table class="recusa-detail-table" id="tblRecusas"></table>
     </div>
 
