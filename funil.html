@@ -106,8 +106,13 @@
     font-size: 0.7rem; color: var(--text-2); font-weight: 500;
     padding: 4px 8px; border-radius: 6px; background: var(--bg);
     display: flex; align-items: center; gap: 6px;
-    transition: background 0.15s;
+    transition: background 0.15s, opacity 0.15s;
+    cursor: grab;
   }
+  .candidatos li:active { cursor: grabbing; }
+  .candidatos li.dragging { opacity: 0.4; }
+  .etapa.drag-over { background: var(--green-bg); outline: 2px dashed var(--green); outline-offset: -4px; border-radius: 6px; }
+  .etapa.drag-over .vazia { color: var(--green); font-weight: 600; }
   .candidatos li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: background 0.15s; }
   .cand-nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cand-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
@@ -1242,12 +1247,46 @@ let weekIdx = weeksWithData.length
   ? ALL_WEEKS.indexOf(weeksWithData[weeksWithData.length - 1])
   : 1;
 
-// ── APPROVAL STATUS (localStorage) ──
+// ── APPROVAL STATUS (localStorage) — keyed by ORIGIN so status follows a moved candidate ──
 function lsKey(weekKey, vaga, stage, nome) {
   return `allu|${weekKey}|${vaga}|${stage}|${nome}`;
 }
 function getStatus(weekKey, vaga, stage, nome) {
   return localStorage.getItem(lsKey(weekKey, vaga, stage, nome)) || '';
+}
+
+// ── MOVE OVERRIDES (localStorage) — let user drag candidates between vagas/stages ──
+function moveKey(weekKey, origVaga, origStage, nome) {
+  return `allu_move|${weekKey}|${origVaga}|${origStage}|${nome}`;
+}
+function getMove(weekKey, origVaga, origStage, nome) {
+  const v = localStorage.getItem(moveKey(weekKey, origVaga, origStage, nome));
+  if (!v) return null;
+  const [vaga, stage, dia] = v.split('|');
+  return { vaga, stage, dia };
+}
+function setMove(weekKey, origVaga, origStage, nome, destVaga, destStage, dia) {
+  localStorage.setItem(moveKey(weekKey, origVaga, origStage, nome), `${destVaga}|${destStage}|${dia}`);
+}
+function clearMove(weekKey, origVaga, origStage, nome) {
+  localStorage.removeItem(moveKey(weekKey, origVaga, origStage, nome));
+}
+
+// Apply moves to baseVagas → each entry annotated with origVaga/origStage (used for status + drag identity)
+function effectiveVagas(weekKey, baseVagas) {
+  const allStages = ['hrInterview', 'roleplay', 'cultura'];
+  const eff = {};
+  for (const v of Object.keys(baseVagas)) eff[v] = { hrInterview: [], roleplay: [], cultura: [] };
+  for (const [vaga, stages] of Object.entries(baseVagas)) {
+    for (const stage of allStages) {
+      for (const cd of (stages[stage] || [])) {
+        const move = getMove(weekKey, vaga, stage, cd.nome);
+        const target = move && eff[move.vaga] ? { vaga: move.vaga, stage: move.stage, dia: move.dia } : { vaga, stage, dia: cd.dia };
+        eff[target.vaga][target.stage].push({ nome: cd.nome, dia: target.dia, origVaga: vaga, origStage: stage });
+      }
+    }
+  }
+  return eff;
 }
 
 // Global registry reset each render — avoids string-escaping issues in onclick
@@ -1260,14 +1299,76 @@ window._toggle = function(idx, val) {
   render();
 };
 
+// Drag-and-drop: persist moves in localStorage, status follows candidate via origVaga/origStage.
+// Buttons are protected from triggering drag (preventDefault in dragstart if target is inside .cand-actions).
+function _onDragStart(e) {
+  const li = e.target.closest('li[data-orig-vaga]');
+  if (!li) return;
+  if (e.target.closest('.cand-actions')) { e.preventDefault(); return; }
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('application/json', JSON.stringify({
+    weekKey:    li.dataset.week,
+    origVaga:   li.dataset.origVaga,
+    origStage:  li.dataset.origStage,
+    nome:       li.dataset.nome,
+    dia:        li.dataset.dia
+  }));
+  li.classList.add('dragging');
+}
+function _onDragEnd(e) {
+  const li = e.target.closest('li[data-orig-vaga]');
+  if (li) li.classList.remove('dragging');
+  document.querySelectorAll('.etapa.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+function _onDragOver(e) {
+  const etapa = e.target.closest('.etapa[data-vaga]');
+  if (!etapa) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+  etapa.classList.add('drag-over');
+}
+function _onDragLeave(e) {
+  const etapa = e.target.closest('.etapa[data-vaga]');
+  if (!etapa) return;
+  // Only remove if we actually left the etapa (not just moved between its children)
+  if (!etapa.contains(e.relatedTarget)) etapa.classList.remove('drag-over');
+}
+function _onDrop(e) {
+  const etapa = e.target.closest('.etapa[data-vaga]');
+  if (!etapa) return;
+  e.preventDefault();
+  etapa.classList.remove('drag-over');
+  let payload;
+  try { payload = JSON.parse(e.dataTransfer.getData('application/json')); } catch { return; }
+  if (!payload || !payload.nome) return;
+  const destVaga  = etapa.dataset.vaga;
+  const destStage = etapa.dataset.stage;
+  // Drop back at origin → clear the move (revert)
+  if (destVaga === payload.origVaga && destStage === payload.origStage) {
+    clearMove(payload.weekKey, payload.origVaga, payload.origStage, payload.nome);
+  } else {
+    setMove(payload.weekKey, payload.origVaga, payload.origStage, payload.nome, destVaga, destStage, payload.dia);
+  }
+  render();
+}
+document.addEventListener('dragstart', _onDragStart);
+document.addEventListener('dragend',   _onDragEnd);
+document.addEventListener('dragover',  _onDragOver);
+document.addEventListener('dragleave', _onDragLeave);
+document.addEventListener('drop',      _onDrop);
+
 // ── RENDERING ──
 function pct(n, max) { return max === 0 ? 0 : Math.round(n / max * 100); }
 
 function renderCandidate(cd, weekKey, vaga, stage) {
-  const status = getStatus(weekKey, vaga, stage, cd.nome);
+  // cd carries origVaga/origStage (set by effectiveVagas); fall back to current location for safety
+  const origVaga  = cd.origVaga  || vaga;
+  const origStage = cd.origStage || stage;
+  const status = getStatus(weekKey, origVaga, origStage, cd.nome);
   const idx = _reg.length;
-  _reg.push({ weekKey, vaga, stage, nome: cd.nome });
-  return `<li class="${status}">
+  _reg.push({ weekKey, vaga: origVaga, stage: origStage, nome: cd.nome });
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  return `<li class="${status}" draggable="true" data-week="${esc(weekKey)}" data-orig-vaga="${esc(origVaga)}" data-orig-stage="${esc(origStage)}" data-nome="${esc(cd.nome)}" data-dia="${esc(cd.dia)}">
     <span class="cand-nome">${cd.nome}</span>
     <div class="cand-right">
       <span class="dia">${cd.dia}</span>
@@ -1283,15 +1384,17 @@ function renderCandidate(cd, weekKey, vaga, stage) {
 
 function renderEtapa(stage, candidates, barWidth, weekKey, vaga) {
   const c = STAGE_COLORS[stage], l = STAGE_LABELS[stage], n = candidates.length;
-  const nAprov  = candidates.filter(cd => getStatus(weekKey, vaga, stage, cd.nome) === 'aprovado').length;
-  const nReprov = candidates.filter(cd => getStatus(weekKey, vaga, stage, cd.nome) === 'reprovado').length;
-  const nReag   = candidates.filter(cd => getStatus(weekKey, vaga, stage, cd.nome) === 'reagendado').length;
-  const nDecl   = candidates.filter(cd => getStatus(weekKey, vaga, stage, cd.nome) === 'declinou').length;
+  const statOf = cd => getStatus(weekKey, cd.origVaga || vaga, cd.origStage || stage, cd.nome);
+  const nAprov  = candidates.filter(cd => statOf(cd) === 'aprovado').length;
+  const nReprov = candidates.filter(cd => statOf(cd) === 'reprovado').length;
+  const nReag   = candidates.filter(cd => statOf(cd) === 'reagendado').length;
+  const nDecl   = candidates.filter(cd => statOf(cd) === 'declinou').length;
   const pctAprov  = n > 0 ? Math.round(nAprov  / n * 100) : 0;
   const pctReprov = n > 0 ? Math.round(nReprov / n * 100) : 0;
   const pctReag   = n > 0 ? Math.round(nReag   / n * 100) : 0;
   const pctDecl   = n > 0 ? Math.round(nDecl   / n * 100) : 0;
-  return `<div class="etapa">
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+  return `<div class="etapa" data-week="${esc(weekKey)}" data-vaga="${esc(vaga)}" data-stage="${esc(stage)}">
     <div class="etapa-top">
       <div class="etapa-label-wrap">
         <div class="etapa-dot ${c.dot}"></div>
@@ -1354,8 +1457,10 @@ function render() {
   const weekKey = ALL_WEEKS[weekIdx];
   const weekData = AGENDA.weeks[weekKey];
   const EMPTY = { hrInterview: [], roleplay: [], cultura: [] };
-  const FALLBACK = Object.fromEntries(VAGA_GROUPS.flatMap(g => g.vagas).map(v => [v, EMPTY]));
-  const vagas = weekData ? weekData.vagas : FALLBACK;
+  const FALLBACK = Object.fromEntries(VAGA_GROUPS.flatMap(g => g.vagas).map(v => [v, { hrInterview: [], roleplay: [], cultura: [] }]));
+  const baseVagas = weekData ? weekData.vagas : FALLBACK;
+  // Apply drag-and-drop overrides from localStorage
+  const vagas = effectiveVagas(weekKey, baseVagas);
   const names = VAGA_GROUPS.flatMap(g => g.vagas).filter(v => vagas[v]);
 
   const get = v => vagas[v] || EMPTY;
