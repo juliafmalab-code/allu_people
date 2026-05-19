@@ -1259,29 +1259,101 @@ let weekIdx = weeksWithData.length
   ? ALL_WEEKS.indexOf(weeksWithData[weeksWithData.length - 1])
   : 1;
 
-// ── APPROVAL STATUS (localStorage) — keyed by ORIGIN so status follows a moved candidate ──
-function lsKey(weekKey, vaga, stage, nome) {
-  return `allu|${weekKey}|${vaga}|${stage}|${nome}`;
-}
-function getStatus(weekKey, vaga, stage, nome) {
-  return localStorage.getItem(lsKey(weekKey, vaga, stage, nome)) || '';
+// ── SHARED STATE (Firebase Realtime DB if FIREBASE_DB_URL set; otherwise localStorage) ──
+// Set FIREBASE_DB_URL to your Firebase project's Realtime Database URL to enable shared state.
+// Setup: console.firebase.google.com → criar projeto → Realtime Database → Iniciar no modo de teste →
+//        copiar a URL (algo como https://NOME-default-rtdb.firebaseio.com).
+const FIREBASE_DB_URL = '';
+
+const _hasFirebase = () => /^https:\/\/[^\s]+/.test(FIREBASE_DB_URL);
+let _state = { status: {}, moves: {} };
+const SYNC_INTERVAL_MS = 3000;
+
+function _loadLocalToState() {
+  _state = { status: {}, moves: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i); if (!k) continue;
+    if (k.startsWith('allu|'))           _state.status[k.slice(5)]  = localStorage.getItem(k);
+    else if (k.startsWith('allu_move|')) _state.moves[k.slice(10)]  = localStorage.getItem(k);
+  }
 }
 
-// ── MOVE OVERRIDES (localStorage) — let user drag candidates between vagas/stages ──
-function moveKey(weekKey, origVaga, origStage, nome) {
-  return `allu_move|${weekKey}|${origVaga}|${origStage}|${nome}`;
+async function _loadFirebaseToState() {
+  try {
+    const res = await fetch(`${FIREBASE_DB_URL}/state.json`, { cache: 'no-store' });
+    const data = await res.json();
+    _state = { status: (data && data.status) || {}, moves: (data && data.moves) || {} };
+  } catch (e) { console.error('Firebase load failed:', e); }
 }
+
+async function _migrateLocalToFirebaseIfEmpty() {
+  if (!_hasFirebase()) return;
+  const remoteEmpty = Object.keys(_state.status).length === 0 && Object.keys(_state.moves).length === 0;
+  if (!remoteEmpty) return;
+  const local = { status: {}, moves: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i); if (!k) continue;
+    if (k.startsWith('allu|'))           local.status[k.slice(5)]  = localStorage.getItem(k);
+    else if (k.startsWith('allu_move|')) local.moves[k.slice(10)]  = localStorage.getItem(k);
+  }
+  if (Object.keys(local.status).length === 0 && Object.keys(local.moves).length === 0) return;
+  try {
+    await fetch(`${FIREBASE_DB_URL}/state.json`, { method: 'PUT', body: JSON.stringify(local) });
+    _state = local;
+  } catch (e) { console.error('Firebase migration failed:', e); }
+}
+
+async function _pollFirebase() {
+  if (!_hasFirebase() || document.hidden) return;
+  try {
+    const res = await fetch(`${FIREBASE_DB_URL}/state.json`, { cache: 'no-store' });
+    const data = await res.json();
+    const newState = { status: (data && data.status) || {}, moves: (data && data.moves) || {} };
+    if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
+  } catch (e) { console.error('Firebase poll failed:', e); }
+}
+
+async function _writeFirebase(section, key, value) {
+  if (!_hasFirebase()) return;
+  const url = `${FIREBASE_DB_URL}/state/${section}/${encodeURIComponent(key)}.json`;
+  try {
+    if (value === null || value === undefined) await fetch(url, { method: 'DELETE' });
+    else await fetch(url, { method: 'PUT', body: JSON.stringify(value) });
+  } catch (e) { console.error('Firebase write failed:', e); }
+}
+
+// ── APPROVAL STATUS (keyed by ORIGIN; status follows a moved candidate) ──
+function getStatus(weekKey, vaga, stage, nome) {
+  return _state.status[`${weekKey}|${vaga}|${stage}|${nome}`] || '';
+}
+function setStatus(weekKey, vaga, stage, nome, val) {
+  const k = `${weekKey}|${vaga}|${stage}|${nome}`;
+  if (val == null || val === '') {
+    delete _state.status[k];
+    if (_hasFirebase()) _writeFirebase('status', k, null); else localStorage.removeItem(`allu|${k}`);
+  } else {
+    _state.status[k] = val;
+    if (_hasFirebase()) _writeFirebase('status', k, val); else localStorage.setItem(`allu|${k}`, val);
+  }
+}
+
+// ── MOVE OVERRIDES (drag-and-drop persistence) ──
 function getMove(weekKey, origVaga, origStage, nome) {
-  const v = localStorage.getItem(moveKey(weekKey, origVaga, origStage, nome));
+  const v = _state.moves[`${weekKey}|${origVaga}|${origStage}|${nome}`];
   if (!v) return null;
   const [vaga, stage, dia] = v.split('|');
   return { vaga, stage, dia };
 }
 function setMove(weekKey, origVaga, origStage, nome, destVaga, destStage, dia) {
-  localStorage.setItem(moveKey(weekKey, origVaga, origStage, nome), `${destVaga}|${destStage}|${dia}`);
+  const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
+  const v = `${destVaga}|${destStage}|${dia}`;
+  _state.moves[k] = v;
+  if (_hasFirebase()) _writeFirebase('moves', k, v); else localStorage.setItem(`allu_move|${k}`, v);
 }
 function clearMove(weekKey, origVaga, origStage, nome) {
-  localStorage.removeItem(moveKey(weekKey, origVaga, origStage, nome));
+  const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
+  delete _state.moves[k];
+  if (_hasFirebase()) _writeFirebase('moves', k, null); else localStorage.removeItem(`allu_move|${k}`);
 }
 
 // Apply moves to baseVagas → each entry annotated with origVaga/origStage (used for status + drag identity)
@@ -1305,9 +1377,8 @@ function effectiveVagas(weekKey, baseVagas) {
 let _reg = [];
 window._toggle = function(idx, val) {
   const {weekKey, vaga, stage, nome} = _reg[idx];
-  const k = lsKey(weekKey, vaga, stage, nome);
-  if (localStorage.getItem(k) === val) localStorage.removeItem(k);
-  else localStorage.setItem(k, val);
+  const cur = getStatus(weekKey, vaga, stage, nome);
+  setStatus(weekKey, vaga, stage, nome, cur === val ? null : val);
   render();
 };
 
@@ -1530,7 +1601,18 @@ function render() {
 function prevWeek() { if (weekIdx > 0) { weekIdx--; render(); } }
 function nextWeek() { if (weekIdx < ALL_WEEKS.length - 1) { weekIdx++; render(); } }
 
-render();
+async function _init() {
+  if (_hasFirebase()) {
+    await _loadFirebaseToState();
+    await _migrateLocalToFirebaseIfEmpty();
+    setInterval(_pollFirebase, SYNC_INTERVAL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) _pollFirebase(); });
+  } else {
+    _loadLocalToState();
+  }
+  render();
+}
+_init();
 </script>
 
 </body>
