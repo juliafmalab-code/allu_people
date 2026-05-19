@@ -49,6 +49,15 @@
   }
   .week-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); background: var(--green-bg); }
   .week-btn:disabled { opacity: 0.3; cursor: default; }
+  .share-btn {
+    margin-left: auto; height: 32px; padding: 0 12px;
+    border: 1px solid var(--green); border-radius: 8px;
+    background: var(--green-bg); color: var(--green);
+    font-size: 0.72rem; font-weight: 700; cursor: pointer;
+    display: flex; align-items: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .share-btn:hover { background: var(--green); color: white; }
   .page-header h1 { font-size: 1.4rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; margin-bottom: 4px; }
   .page-header p  { font-size: 0.85rem; color: var(--text-2); }
 
@@ -1370,10 +1379,12 @@ function setStatus(weekKey, vaga, stage, nome, val) {
   const k = `${weekKey}|${vaga}|${stage}|${nome}`;
   if (val == null || val === '') {
     delete _state.status[k];
-    if (_hasFirebase()) _writeFirebase('status', k, null); else localStorage.removeItem(`allu|${k}`);
+    if (_hasFirebase()) _writeFirebase('status', k, null);
+    else { localStorage.removeItem(`allu|${k}`); _updateURL(); }
   } else {
     _state.status[k] = val;
-    if (_hasFirebase()) _writeFirebase('status', k, val); else localStorage.setItem(`allu|${k}`, val);
+    if (_hasFirebase()) _writeFirebase('status', k, val);
+    else { localStorage.setItem(`allu|${k}`, val); _updateURL(); }
   }
 }
 
@@ -1388,13 +1399,60 @@ function setMove(weekKey, origVaga, origStage, nome, destVaga, destStage, dia) {
   const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
   const v = `${destVaga}|${destStage}|${dia}`;
   _state.moves[k] = v;
-  if (_hasFirebase()) _writeFirebase('moves', k, v); else localStorage.setItem(`allu_move|${k}`, v);
+  if (_hasFirebase()) _writeFirebase('moves', k, v);
+  else { localStorage.setItem(`allu_move|${k}`, v); _updateURL(); }
 }
 function clearMove(weekKey, origVaga, origStage, nome) {
   const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
   delete _state.moves[k];
-  if (_hasFirebase()) _writeFirebase('moves', k, null); else localStorage.removeItem(`allu_move|${k}`);
+  if (_hasFirebase()) _writeFirebase('moves', k, null);
+  else { localStorage.removeItem(`allu_move|${k}`); _updateURL(); }
 }
+
+// ── URL-EMBEDDED STATE SHARING (fallback when no Firebase configured) ──
+function _encodeStateB64(s) {
+  return btoa(unescape(encodeURIComponent(JSON.stringify(s))))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function _decodeStateB64(b64) {
+  try {
+    const s = b64.replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(decodeURIComponent(escape(atob(s))));
+  } catch (e) { return null; }
+}
+function _updateURL() {
+  if (_hasFirebase()) return;
+  const empty = Object.keys(_state.status).length === 0 && Object.keys(_state.moves).length === 0;
+  const url = new URL(window.location.href);
+  if (empty) url.searchParams.delete('s');
+  else url.searchParams.set('s', _encodeStateB64(_state));
+  history.replaceState(null, '', url.toString());
+}
+function _loadFromURL() {
+  const param = new URL(window.location.href).searchParams.get('s');
+  if (!param) return false;
+  const incoming = _decodeStateB64(param);
+  if (!incoming) return false;
+  // URL state wins on conflicts (you're viewing a shared state)
+  _state = {
+    status: { ..._state.status, ...(incoming.status || {}) },
+    moves:  { ..._state.moves,  ...(incoming.moves  || {}) }
+  };
+  // Persist into localStorage so reload/new sessions retain it
+  for (const [k, v] of Object.entries(_state.status)) localStorage.setItem(`allu|${k}`, v);
+  for (const [k, v] of Object.entries(_state.moves))  localStorage.setItem(`allu_move|${k}`, v);
+  return true;
+}
+window._copyShareLink = async function() {
+  const btn = document.getElementById('copy-link-btn');
+  const orig = btn ? btn.innerHTML : '';
+  try {
+    await navigator.clipboard.writeText(window.location.href);
+    if (btn) { btn.innerHTML = '✓ Copiado!'; setTimeout(() => btn.innerHTML = orig, 1500); }
+  } catch {
+    if (btn) { btn.innerHTML = 'Copia da URL ↑'; setTimeout(() => btn.innerHTML = orig, 2500); }
+  }
+};
 
 // Apply moves to baseVagas → each entry annotated with origVaga/origStage (used for status + drag identity)
 function effectiveVagas(weekKey, baseVagas) {
@@ -1623,6 +1681,7 @@ function render() {
         <button class="week-btn" onclick="prevWeek()" ${isPrev ? '' : 'disabled'} title="Semana anterior">&#8592;</button>
         <div class="badge"><span class="dot"></span>${label}</div>
         <button class="week-btn" onclick="nextWeek()" ${isNext ? '' : 'disabled'} title="Próxima semana">&#8594;</button>
+        <button id="copy-link-btn" class="share-btn" onclick="_copyShareLink()" title="Copia o link com suas marcações para compartilhar">🔗 Copiar link compartilhável</button>
       </div>
       <h1>Entrevistas da Semana</h1>
       <p>HR Interview, Roleplay e Cultura — agrupado por Operação e Liderança</p>
@@ -1649,6 +1708,7 @@ async function _init() {
     document.addEventListener('visibilitychange', () => { if (!document.hidden) _pollFirebase(); });
   } else {
     _loadLocalToState();
+    if (_loadFromURL()) _updateURL();
   }
   render();
 }
