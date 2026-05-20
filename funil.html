@@ -84,9 +84,21 @@
 
   /* Vaga cards */
   .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .vaga-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .vaga-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; transition: opacity 0.2s; }
+  .vaga-card.completed { opacity: 0.55; }
+  .vaga-card.completed:hover { opacity: 0.85; }
   .vaga-header { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+  .vaga-header-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
   .vaga-title { font-size: 0.95rem; font-weight: 700; color: var(--text); letter-spacing: -0.2px; margin-top: 6px; line-height: 1.25; min-height: 2.4em; }
+  .btn-concluir {
+    border: 1px solid var(--border); border-radius: 6px; background: var(--card);
+    cursor: pointer; padding: 4px 8px; font-size: 0.6rem; font-weight: 800;
+    letter-spacing: 0.4px; color: var(--text-2); text-transform: uppercase;
+    transition: all 0.15s; flex-shrink: 0;
+  }
+  .btn-concluir:hover { background: var(--green-bg); color: var(--green); border-color: var(--green); }
+  .vaga-card.completed .btn-concluir { background: var(--green); color: white; border-color: var(--green); }
+  .vaga-card.completed .btn-concluir:hover { background: var(--green-mid); }
   .etapas { padding: 14px 0 4px; }
   .etapa { padding: 12px 20px 14px; border-bottom: 1px solid var(--border); }
   .etapa:last-child { border-bottom: none; }
@@ -1444,15 +1456,16 @@ let weekIdx = weeksWithData.length
 const FIREBASE_DB_URL = '';
 
 const _hasFirebase = () => /^https:\/\/[^\s]+/.test(FIREBASE_DB_URL);
-let _state = { status: {}, moves: {} };
+let _state = { status: {}, moves: {}, completed: {} };
 const SYNC_INTERVAL_MS = 3000;
 
 function _loadLocalToState() {
-  _state = { status: {}, moves: {} };
+  _state = { status: {}, moves: {}, completed: {} };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i); if (!k) continue;
-    if (k.startsWith('allu|'))           _state.status[k.slice(5)]  = localStorage.getItem(k);
-    else if (k.startsWith('allu_move|')) _state.moves[k.slice(10)]  = localStorage.getItem(k);
+    if      (k.startsWith('allu_completed|')) _state.completed[k.slice(15)] = localStorage.getItem(k);
+    else if (k.startsWith('allu_move|'))      _state.moves[k.slice(10)]     = localStorage.getItem(k);
+    else if (k.startsWith('allu|'))           _state.status[k.slice(5)]     = localStorage.getItem(k);
   }
 }
 
@@ -1460,21 +1473,31 @@ async function _loadFirebaseToState() {
   try {
     const res = await fetch(`${FIREBASE_DB_URL}/state.json`, { cache: 'no-store' });
     const data = await res.json();
-    _state = { status: (data && data.status) || {}, moves: (data && data.moves) || {} };
+    _state = {
+      status:    (data && data.status)    || {},
+      moves:     (data && data.moves)     || {},
+      completed: (data && data.completed) || {}
+    };
   } catch (e) { console.error('Firebase load failed:', e); }
 }
 
 async function _migrateLocalToFirebaseIfEmpty() {
   if (!_hasFirebase()) return;
-  const remoteEmpty = Object.keys(_state.status).length === 0 && Object.keys(_state.moves).length === 0;
+  const remoteEmpty = Object.keys(_state.status).length === 0
+                   && Object.keys(_state.moves).length === 0
+                   && Object.keys(_state.completed || {}).length === 0;
   if (!remoteEmpty) return;
-  const local = { status: {}, moves: {} };
+  const local = { status: {}, moves: {}, completed: {} };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i); if (!k) continue;
-    if (k.startsWith('allu|'))           local.status[k.slice(5)]  = localStorage.getItem(k);
-    else if (k.startsWith('allu_move|')) local.moves[k.slice(10)]  = localStorage.getItem(k);
+    if      (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
+    else if (k.startsWith('allu_move|'))      local.moves[k.slice(10)]     = localStorage.getItem(k);
+    else if (k.startsWith('allu|'))           local.status[k.slice(5)]     = localStorage.getItem(k);
   }
-  if (Object.keys(local.status).length === 0 && Object.keys(local.moves).length === 0) return;
+  const localEmpty = Object.keys(local.status).length === 0
+                  && Object.keys(local.moves).length === 0
+                  && Object.keys(local.completed).length === 0;
+  if (localEmpty) return;
   try {
     await fetch(`${FIREBASE_DB_URL}/state.json`, { method: 'PUT', body: JSON.stringify(local) });
     _state = local;
@@ -1486,7 +1509,11 @@ async function _pollFirebase() {
   try {
     const res = await fetch(`${FIREBASE_DB_URL}/state.json`, { cache: 'no-store' });
     const data = await res.json();
-    const newState = { status: (data && data.status) || {}, moves: (data && data.moves) || {} };
+    const newState = {
+      status:    (data && data.status)    || {},
+      moves:     (data && data.moves)     || {},
+      completed: (data && data.completed) || {}
+    };
     if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
   } catch (e) { console.error('Firebase poll failed:', e); }
 }
@@ -1537,6 +1564,27 @@ function clearMove(weekKey, origVaga, origStage, nome) {
   if (_hasFirebase()) _writeFirebase('moves', k, null);
   else { localStorage.removeItem(`allu_move|${k}`); _updateURL(); }
 }
+
+// ── COMPLETED VAGAS (per week — moves the vaga to the end of its group) ──
+function isCompleted(weekKey, vaga) {
+  return !!_state.completed[`${weekKey}|${vaga}`];
+}
+function setCompleted(weekKey, vaga, val) {
+  const k = `${weekKey}|${vaga}`;
+  if (val) {
+    _state.completed[k] = '1';
+    if (_hasFirebase()) _writeFirebase('completed', k, '1');
+    else { localStorage.setItem(`allu_completed|${k}`, '1'); _updateURL(); }
+  } else {
+    delete _state.completed[k];
+    if (_hasFirebase()) _writeFirebase('completed', k, null);
+    else { localStorage.removeItem(`allu_completed|${k}`); _updateURL(); }
+  }
+}
+window._toggleCompleted = function(weekKey, vaga) {
+  setCompleted(weekKey, vaga, !isCompleted(weekKey, vaga));
+  render();
+};
 
 // ── URL-EMBEDDED STATE SHARING (fallback when no Firebase configured) ──
 function _encodeStateB64(s) {
@@ -1735,9 +1783,14 @@ function renderVaga(nome, data, maxes, weekKey) {
     ? `${cad} ${cad === 1 ? 'vaga aberta' : 'vagas abertas'}`
     : 'sem meta definida';
   const badgeClass = cad ? 'badge' : 'badge badge-empty';
-  return `<div class="vaga-card">
+  const done = isCompleted(weekKey, nome);
+  const escAttr = s => String(s).replace(/'/g, "\\'");
+  return `<div class="vaga-card${done ? ' completed' : ''}">
     <div class="vaga-header">
-      <div class="${badgeClass}"><span class="dot"></span>${badgeContent}</div>
+      <div class="vaga-header-top">
+        <div class="${badgeClass}"><span class="dot"></span>${badgeContent}</div>
+        <button class="btn-concluir" onclick="_toggleCompleted('${escAttr(weekKey)}','${escAttr(nome)}')" title="${done ? 'Reabrir vaga (volta pra ordem original)' : 'Concluir vaga (move pro final do grupo)'}">${done ? '↩ Reabrir' : '✓ Concluir'}</button>
+      </div>
       <div class="vaga-title">${nome}</div>
     </div>
     <div class="etapas">
@@ -1789,8 +1842,13 @@ function render() {
   const isNext = weekIdx < ALL_WEEKS.length - 1;
 
   const renderGrupo = grupo => {
-    const vagasGrupo = grupo.vagas.filter(v => vagas[v]);
+    let vagasGrupo = grupo.vagas.filter(v => vagas[v]);
     if (!vagasGrupo.length) return '';
+    // Concluidas vao pro final, mantendo a ordem relativa entre si
+    vagasGrupo = vagasGrupo
+      .map((v, i) => ({ v, i, done: isCompleted(weekKey, v) }))
+      .sort((a, b) => (a.done - b.done) || (a.i - b.i))
+      .map(x => x.v);
     const totG = vagasGrupo.reduce((s, v) => s + get(v).hrInterview.length + get(v).roleplay.length + get(v).cultura.length, 0);
     return `
       <div class="grupo">
