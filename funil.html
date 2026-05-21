@@ -1497,15 +1497,17 @@ let weekIdx = weeksWithData.length
   ? ALL_WEEKS.indexOf(weeksWithData[weeksWithData.length - 1])
   : 1;
 
-// ── SHARED STATE (Firebase Realtime DB if FIREBASE_DB_URL set; otherwise localStorage) ──
-// Set FIREBASE_DB_URL to your Firebase project's Realtime Database URL to enable shared state.
-// Setup: console.firebase.google.com → criar projeto → Realtime Database → Iniciar no modo de teste →
-//        copiar a URL (algo como https://NOME-default-rtdb.firebaseio.com).
+// ── SHARED STATE (Google Sheets via Apps Script → Firebase Realtime DB → localStorage) ──
+// Preferência: SHEETS_API_URL > FIREBASE_DB_URL > localStorage.
+// Sheets: ver apps_script.gs no repo. Deploy como Web App e cole a URL aqui.
+// Firebase: console.firebase.google.com → Realtime Database → cole a URL aqui.
+const SHEETS_API_URL  = '';
 const FIREBASE_DB_URL = '';
 
+const _hasSheets   = () => /^https:\/\/script\.google\.com\/macros\//.test(SHEETS_API_URL);
 const _hasFirebase = () => /^https:\/\/[^\s]+/.test(FIREBASE_DB_URL);
 let _state = { status: {}, moves: {}, completed: {} };
-const SYNC_INTERVAL_MS = 3000;
+const SYNC_INTERVAL_MS = 5000;
 
 function _loadLocalToState() {
   _state = { status: {}, moves: {}, completed: {} };
@@ -1575,6 +1577,67 @@ async function _writeFirebase(section, key, value) {
   } catch (e) { console.error('Firebase write failed:', e); }
 }
 
+async function _loadSheetsToState() {
+  try {
+    const res = await fetch(SHEETS_API_URL, { cache: 'no-store' });
+    const data = await res.json();
+    _state = {
+      status:    (data && data.status)    || {},
+      moves:     (data && data.moves)     || {},
+      completed: (data && data.completed) || {}
+    };
+  } catch (e) { console.error('Sheets load failed:', e); }
+}
+
+async function _pollSheets() {
+  if (!_hasSheets() || document.hidden) return;
+  try {
+    const res = await fetch(SHEETS_API_URL, { cache: 'no-store' });
+    const data = await res.json();
+    const newState = {
+      status:    (data && data.status)    || {},
+      moves:     (data && data.moves)     || {},
+      completed: (data && data.completed) || {}
+    };
+    if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
+  } catch (e) { console.error('Sheets poll failed:', e); }
+}
+
+// Fire-and-forget. No headers → request stays "simple" (Apps Script web apps não respondem preflight CORS).
+function _writeSheets(section, key, value) {
+  if (!_hasSheets()) return;
+  fetch(SHEETS_API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ section, key, value })
+  }).catch(e => console.error('Sheets write failed:', e));
+}
+
+async function _migrateLocalToSheetsIfEmpty() {
+  if (!_hasSheets()) return;
+  const remoteEmpty = Object.keys(_state.status).length === 0
+                   && Object.keys(_state.moves).length === 0
+                   && Object.keys(_state.completed || {}).length === 0;
+  if (!remoteEmpty) return;
+  const local = { status: {}, moves: {}, completed: {} };
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i); if (!k) continue;
+    if      (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
+    else if (k.startsWith('allu_move|'))      local.moves[k.slice(10)]     = localStorage.getItem(k);
+    else if (k.startsWith('allu|'))           local.status[k.slice(5)]     = localStorage.getItem(k);
+  }
+  const localEmpty = Object.keys(local.status).length === 0
+                  && Object.keys(local.moves).length === 0
+                  && Object.keys(local.completed).length === 0;
+  if (localEmpty) return;
+  try {
+    await fetch(SHEETS_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'bulk', state: local })
+    });
+    _state = local;
+  } catch (e) { console.error('Sheets migration failed:', e); }
+}
+
 // ── APPROVAL STATUS (keyed by ORIGIN; status follows a moved candidate) ──
 function getStatus(weekKey, vaga, stage, nome) {
   return _state.status[`${weekKey}|${vaga}|${stage}|${nome}`] || '';
@@ -1583,11 +1646,13 @@ function setStatus(weekKey, vaga, stage, nome, val) {
   const k = `${weekKey}|${vaga}|${stage}|${nome}`;
   if (val == null || val === '') {
     delete _state.status[k];
-    if (_hasFirebase()) _writeFirebase('status', k, null);
+    if (_hasSheets()) _writeSheets('status', k, null);
+    else if (_hasFirebase()) _writeFirebase('status', k, null);
     else { localStorage.removeItem(`allu|${k}`); _updateURL(); }
   } else {
     _state.status[k] = val;
-    if (_hasFirebase()) _writeFirebase('status', k, val);
+    if (_hasSheets()) _writeSheets('status', k, val);
+    else if (_hasFirebase()) _writeFirebase('status', k, val);
     else { localStorage.setItem(`allu|${k}`, val); _updateURL(); }
   }
 }
@@ -1603,13 +1668,15 @@ function setMove(weekKey, origVaga, origStage, nome, destVaga, destStage, dia) {
   const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
   const v = `${destVaga}|${destStage}|${dia}`;
   _state.moves[k] = v;
-  if (_hasFirebase()) _writeFirebase('moves', k, v);
+  if (_hasSheets()) _writeSheets('moves', k, v);
+  else if (_hasFirebase()) _writeFirebase('moves', k, v);
   else { localStorage.setItem(`allu_move|${k}`, v); _updateURL(); }
 }
 function clearMove(weekKey, origVaga, origStage, nome) {
   const k = `${weekKey}|${origVaga}|${origStage}|${nome}`;
   delete _state.moves[k];
-  if (_hasFirebase()) _writeFirebase('moves', k, null);
+  if (_hasSheets()) _writeSheets('moves', k, null);
+  else if (_hasFirebase()) _writeFirebase('moves', k, null);
   else { localStorage.removeItem(`allu_move|${k}`); _updateURL(); }
 }
 
@@ -1621,11 +1688,13 @@ function setCompleted(weekKey, vaga, val) {
   const k = `${weekKey}|${vaga}`;
   if (val) {
     _state.completed[k] = '1';
-    if (_hasFirebase()) _writeFirebase('completed', k, '1');
+    if (_hasSheets()) _writeSheets('completed', k, '1');
+    else if (_hasFirebase()) _writeFirebase('completed', k, '1');
     else { localStorage.setItem(`allu_completed|${k}`, '1'); _updateURL(); }
   } else {
     delete _state.completed[k];
-    if (_hasFirebase()) _writeFirebase('completed', k, null);
+    if (_hasSheets()) _writeSheets('completed', k, null);
+    else if (_hasFirebase()) _writeFirebase('completed', k, null);
     else { localStorage.removeItem(`allu_completed|${k}`); _updateURL(); }
   }
 }
@@ -1936,7 +2005,12 @@ function prevWeek() { if (weekIdx > 0) { weekIdx--; render(); } }
 function nextWeek() { if (weekIdx < ALL_WEEKS.length - 1) { weekIdx++; render(); } }
 
 async function _init() {
-  if (_hasFirebase()) {
+  if (_hasSheets()) {
+    await _loadSheetsToState();
+    await _migrateLocalToSheetsIfEmpty();
+    setInterval(_pollSheets, SYNC_INTERVAL_MS);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) _pollSheets(); });
+  } else if (_hasFirebase()) {
     await _loadFirebaseToState();
     await _migrateLocalToFirebaseIfEmpty();
     setInterval(_pollFirebase, SYNC_INTERVAL_MS);
