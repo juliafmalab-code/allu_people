@@ -199,9 +199,27 @@
     .totals-row { grid-template-columns: repeat(2, 1fr); }
     main { padding: 20px 16px; }
   }
+
+  #sync-banner {
+    display: none;
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 9999;
+    padding: 10px 16px;
+    background: #fef3c7; color: #92400e;
+    border-bottom: 1px solid #f59e0b;
+    font: 13px/1.4 -apple-system, BlinkMacSystemFont, sans-serif;
+    text-align: center;
+  }
+  #sync-banner.show { display: block; }
+  #sync-banner strong { color: #78350f; }
 </style>
 </head>
 <body>
+
+<div id="sync-banner">
+  <strong>Sincronização desligada.</strong>
+  Suas mudanças estão sendo salvas só nesta máquina (não chegam pra Ana/Lara). Verifique se você está logada em <strong>talentos@allugator.com</strong> nesta janela e recarregue.
+</div>
 
 <header>
   <a class="logo" href="index.html" title="Voltar à página inicial">
@@ -1509,6 +1527,15 @@ const _hasFirebase = () => /^https:\/\/[^\s]+/.test(FIREBASE_DB_URL);
 let _state = { status: {}, moves: {}, completed: {} };
 const SYNC_INTERVAL_MS = 5000;
 
+let _syncOk = null; // null = ainda nao tentou; true = ok; false = falhou
+function _setSyncOk(ok) {
+  if (_syncOk === ok) return;
+  _syncOk = ok;
+  const banner = document.getElementById('sync-banner');
+  if (!banner) return;
+  banner.classList.toggle('show', ok === false);
+}
+
 function _loadLocalToState() {
   _state = { status: {}, moves: {}, completed: {} };
   for (let i = 0; i < localStorage.length; i++) {
@@ -1586,7 +1613,8 @@ async function _loadSheetsToState() {
       moves:     (data && data.moves)     || {},
       completed: (data && data.completed) || {}
     };
-  } catch (e) { console.error('Sheets load failed:', e); }
+    _setSyncOk(true);
+  } catch (e) { console.error('Sheets load failed:', e); _setSyncOk(false); }
 }
 
 async function _pollSheets() {
@@ -1600,16 +1628,22 @@ async function _pollSheets() {
       completed: (data && data.completed) || {}
     };
     if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
-  } catch (e) { console.error('Sheets poll failed:', e); }
+    _setSyncOk(true);
+  } catch (e) { console.error('Sheets poll failed:', e); _setSyncOk(false); }
 }
 
-// Fire-and-forget. No headers → request stays "simple" (Apps Script web apps não respondem preflight CORS).
-function _writeSheets(section, key, value) {
+// No headers → request stays "simple" (Apps Script web apps não respondem preflight CORS).
+async function _writeSheets(section, key, value) {
   if (!_hasSheets()) return;
-  fetch(SHEETS_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ section, key, value })
-  }).catch(e => console.error('Sheets write failed:', e));
+  try {
+    const res = await fetch(SHEETS_API_URL, {
+      method: 'POST',
+      body: JSON.stringify({ section, key, value })
+    });
+    const data = await res.json();
+    if (data && data.ok) _setSyncOk(true);
+    else { console.error('Sheets write rejected:', data); _setSyncOk(false); }
+  } catch (e) { console.error('Sheets write failed:', e); _setSyncOk(false); }
 }
 
 async function _migrateLocalToSheetsIfEmpty() {
