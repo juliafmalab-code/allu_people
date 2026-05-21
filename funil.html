@@ -136,6 +136,7 @@
   .etapa.drag-over .vazia { color: var(--green); font-weight: 600; }
   .candidatos li::before { content: ''; width: 4px; height: 4px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; transition: background 0.15s; }
   .cand-nome { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cand-nome.renamed::after { content: " ✎"; color: #6b7280; font-size: 0.75em; }
   .cand-right { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
   .dia { font-size: 0.6rem; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   .cand-actions { display: flex; gap: 3px; }
@@ -1524,7 +1525,7 @@ const FIREBASE_DB_URL = '';
 
 const _hasSheets   = () => /^https:\/\/script\.google\.com\/(a\/)?macros\//.test(SHEETS_API_URL);
 const _hasFirebase = () => /^https:\/\/[^\s]+/.test(FIREBASE_DB_URL);
-let _state = { status: {}, moves: {}, completed: {} };
+let _state = { status: {}, moves: {}, completed: {}, renames: {} };
 const SYNC_INTERVAL_MS = 5000;
 
 let _syncOk = null; // null = ainda nao tentou; true = ok; false = falhou
@@ -1537,10 +1538,11 @@ function _setSyncOk(ok) {
 }
 
 function _loadLocalToState() {
-  _state = { status: {}, moves: {}, completed: {} };
+  _state = { status: {}, moves: {}, completed: {}, renames: {} };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i); if (!k) continue;
-    if      (k.startsWith('allu_completed|')) _state.completed[k.slice(15)] = localStorage.getItem(k);
+    if      (k.startsWith('allu_rename|'))    _state.renames[k.slice(12)]   = localStorage.getItem(k);
+    else if (k.startsWith('allu_completed|')) _state.completed[k.slice(15)] = localStorage.getItem(k);
     else if (k.startsWith('allu_move|'))      _state.moves[k.slice(10)]     = localStorage.getItem(k);
     else if (k.startsWith('allu|'))           _state.status[k.slice(5)]     = localStorage.getItem(k);
   }
@@ -1553,7 +1555,8 @@ async function _loadFirebaseToState() {
     _state = {
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
-      completed: (data && data.completed) || {}
+      completed: (data && data.completed) || {},
+      renames:   (data && data.renames)   || {}
     };
   } catch (e) { console.error('Firebase load failed:', e); }
 }
@@ -1562,18 +1565,21 @@ async function _migrateLocalToFirebaseIfEmpty() {
   if (!_hasFirebase()) return;
   const remoteEmpty = Object.keys(_state.status).length === 0
                    && Object.keys(_state.moves).length === 0
-                   && Object.keys(_state.completed || {}).length === 0;
+                   && Object.keys(_state.completed || {}).length === 0
+                   && Object.keys(_state.renames || {}).length === 0;
   if (!remoteEmpty) return;
-  const local = { status: {}, moves: {}, completed: {} };
+  const local = { status: {}, moves: {}, completed: {}, renames: {} };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i); if (!k) continue;
-    if      (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
+    if      (k.startsWith('allu_rename|'))    local.renames[k.slice(12)]   = localStorage.getItem(k);
+    else if (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
     else if (k.startsWith('allu_move|'))      local.moves[k.slice(10)]     = localStorage.getItem(k);
     else if (k.startsWith('allu|'))           local.status[k.slice(5)]     = localStorage.getItem(k);
   }
   const localEmpty = Object.keys(local.status).length === 0
                   && Object.keys(local.moves).length === 0
-                  && Object.keys(local.completed).length === 0;
+                  && Object.keys(local.completed).length === 0
+                  && Object.keys(local.renames).length === 0;
   if (localEmpty) return;
   try {
     await fetch(`${FIREBASE_DB_URL}/state.json`, { method: 'PUT', body: JSON.stringify(local) });
@@ -1589,7 +1595,8 @@ async function _pollFirebase() {
     const newState = {
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
-      completed: (data && data.completed) || {}
+      completed: (data && data.completed) || {},
+      renames:   (data && data.renames)   || {}
     };
     if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
   } catch (e) { console.error('Firebase poll failed:', e); }
@@ -1629,7 +1636,8 @@ async function _loadSheetsToState() {
     _state = _applyPending({
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
-      completed: (data && data.completed) || {}
+      completed: (data && data.completed) || {},
+      renames:   (data && data.renames)   || {}
     });
     _setSyncOk(true);
   } catch (e) { console.error('Sheets load failed:', e); _setSyncOk(false); }
@@ -1643,7 +1651,8 @@ async function _pollSheets() {
     const newState = _applyPending({
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
-      completed: (data && data.completed) || {}
+      completed: (data && data.completed) || {},
+      renames:   (data && data.renames)   || {}
     });
     if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
     _setSyncOk(true);
@@ -1682,18 +1691,21 @@ async function _migrateLocalToSheetsIfEmpty() {
   if (!_hasSheets()) return;
   const remoteEmpty = Object.keys(_state.status).length === 0
                    && Object.keys(_state.moves).length === 0
-                   && Object.keys(_state.completed || {}).length === 0;
+                   && Object.keys(_state.completed || {}).length === 0
+                   && Object.keys(_state.renames || {}).length === 0;
   if (!remoteEmpty) return;
-  const local = { status: {}, moves: {}, completed: {} };
+  const local = { status: {}, moves: {}, completed: {}, renames: {} };
   for (let i = 0; i < localStorage.length; i++) {
     const k = localStorage.key(i); if (!k) continue;
-    if      (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
+    if      (k.startsWith('allu_rename|'))    local.renames[k.slice(12)]   = localStorage.getItem(k);
+    else if (k.startsWith('allu_completed|')) local.completed[k.slice(15)] = localStorage.getItem(k);
     else if (k.startsWith('allu_move|'))      local.moves[k.slice(10)]     = localStorage.getItem(k);
     else if (k.startsWith('allu|'))           local.status[k.slice(5)]     = localStorage.getItem(k);
   }
   const localEmpty = Object.keys(local.status).length === 0
                   && Object.keys(local.moves).length === 0
-                  && Object.keys(local.completed).length === 0;
+                  && Object.keys(local.completed).length === 0
+                  && Object.keys(local.renames).length === 0;
   if (localEmpty) return;
   try {
     await fetch(SHEETS_API_URL, {
@@ -1766,6 +1778,35 @@ function setCompleted(weekKey, vaga, val) {
 }
 window._toggleCompleted = function(weekKey, vaga) {
   setCompleted(weekKey, vaga, !isCompleted(weekKey, vaga));
+  render();
+};
+
+// ── RENAMES (apelido de exibição; identidade do candidato segue cd.nome original) ──
+function getRename(weekKey, vaga, stage, nome) {
+  return (_state.renames || {})[`${weekKey}|${vaga}|${stage}|${nome}`] || '';
+}
+function setRename(weekKey, vaga, stage, nome, novo) {
+  if (!_state.renames) _state.renames = {};
+  const k = `${weekKey}|${vaga}|${stage}|${nome}`;
+  if (novo == null || novo === '' || novo === nome) {
+    delete _state.renames[k];
+    if (_hasSheets()) _writeSheets('renames', k, null);
+    else if (_hasFirebase()) _writeFirebase('renames', k, null);
+    else { localStorage.removeItem(`allu_rename|${k}`); _updateURL(); }
+  } else {
+    _state.renames[k] = novo;
+    if (_hasSheets()) _writeSheets('renames', k, novo);
+    else if (_hasFirebase()) _writeFirebase('renames', k, novo);
+    else { localStorage.setItem(`allu_rename|${k}`, novo); _updateURL(); }
+  }
+}
+window._renameStart = function(idx, event) {
+  if (event && event.target && event.target.closest('.cand-actions')) return;
+  const r = _reg[idx]; if (!r) return;
+  const atual = getRename(r.weekKey, r.vaga, r.stage, r.nome) || r.nome;
+  const novo = prompt('Editar nome do candidato:', atual);
+  if (novo == null) return;
+  setRename(r.weekKey, r.vaga, r.stage, r.nome, novo.trim());
   render();
 };
 
@@ -1908,9 +1949,11 @@ function renderCandidate(cd, weekKey, vaga, stage) {
   const status = getStatus(weekKey, origVaga, origStage, cd.nome);
   const idx = _reg.length;
   _reg.push({ weekKey, vaga: origVaga, stage: origStage, nome: cd.nome });
-  const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-  return `<li class="${status}" draggable="true" data-week="${esc(weekKey)}" data-orig-vaga="${esc(origVaga)}" data-orig-stage="${esc(origStage)}" data-nome="${esc(cd.nome)}" data-dia="${esc(cd.dia)}">
-    <span class="cand-nome">${cd.nome}</span>
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const displayName = getRename(weekKey, origVaga, origStage, cd.nome) || cd.nome;
+  const renamed = displayName !== cd.nome;
+  return `<li class="${status}" draggable="true" data-week="${esc(weekKey)}" data-orig-vaga="${esc(origVaga)}" data-orig-stage="${esc(origStage)}" data-nome="${esc(cd.nome)}" data-dia="${esc(cd.dia)}" ondblclick="_renameStart(${idx}, event)" title="Clique duas vezes para editar o nome">
+    <span class="cand-nome${renamed ? ' renamed' : ''}">${esc(displayName)}</span>
     <div class="cand-right">
       <span class="dia">${cd.dia}</span>
       <div class="cand-actions">

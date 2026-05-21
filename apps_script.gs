@@ -26,10 +26,13 @@ function _sheet_() {
   return sh;
 }
 
+const SECTIONS = ['status', 'moves', 'completed', 'renames'];
+
 function _readAll_() {
   const sh = _sheet_();
   const rows = sh.getDataRange().getValues();
-  const out = { status: {}, moves: {}, completed: {} };
+  const out = {};
+  SECTIONS.forEach(s => out[s] = {});
   for (let i = 1; i < rows.length; i++) {
     const [section, key, value] = rows[i];
     if (!section || !key) continue;
@@ -59,7 +62,7 @@ function doPost(e) {
   if (body.action === 'bulk') return _handleBulk_(body.state, user, now);
 
   const { section, key, value } = body;
-  if (!['status', 'moves', 'completed'].includes(section) || !key) {
+  if (!SECTIONS.includes(section) || !key) {
     return _json_({ ok: false, error: 'invalid_payload' });
   }
 
@@ -91,7 +94,7 @@ function _handleBulk_(state, user, now) {
   if (lastRow > 1) sh.getRange(2, 1, lastRow - 1, Math.max(5, sh.getLastColumn())).clearContent();
 
   const rows = [];
-  for (const section of ['status', 'moves', 'completed']) {
+  for (const section of SECTIONS) {
     const sec = state[section] || {};
     for (const k of Object.keys(sec)) {
       const v = sec[k];
