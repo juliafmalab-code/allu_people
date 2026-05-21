@@ -1604,15 +1604,33 @@ async function _writeFirebase(section, key, value) {
   } catch (e) { console.error('Firebase write failed:', e); }
 }
 
+// Writes que sairam daqui mas podem ainda nao ter aparecido no GET seguinte
+// (Apps Script tem ~3-5s de propagacao entre append no Sheet e proxima leitura).
+// Sao reaplicados em cima do estado do servidor ate expirarem.
+const _pendingWrites = new Map();
+const _PENDING_TTL_MS = SYNC_INTERVAL_MS + 5000;
+
+function _applyPending(state) {
+  for (const [writeId, value] of _pendingWrites) {
+    const sep = writeId.indexOf('||');
+    const section = writeId.slice(0, sep);
+    const k = writeId.slice(sep + 2);
+    if (!state[section]) continue;
+    if (value == null || value === '') delete state[section][k];
+    else state[section][k] = value;
+  }
+  return state;
+}
+
 async function _loadSheetsToState() {
   try {
     const res = await fetch(SHEETS_API_URL, { cache: 'no-store' });
     const data = await res.json();
-    _state = {
+    _state = _applyPending({
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
       completed: (data && data.completed) || {}
-    };
+    });
     _setSyncOk(true);
   } catch (e) { console.error('Sheets load failed:', e); _setSyncOk(false); }
 }
@@ -1622,28 +1640,42 @@ async function _pollSheets() {
   try {
     const res = await fetch(SHEETS_API_URL, { cache: 'no-store' });
     const data = await res.json();
-    const newState = {
+    const newState = _applyPending({
       status:    (data && data.status)    || {},
       moves:     (data && data.moves)     || {},
       completed: (data && data.completed) || {}
-    };
+    });
     if (JSON.stringify(newState) !== JSON.stringify(_state)) { _state = newState; render(); }
     _setSyncOk(true);
   } catch (e) { console.error('Sheets poll failed:', e); _setSyncOk(false); }
 }
 
 // No headers → request stays "simple" (Apps Script web apps não respondem preflight CORS).
-async function _writeSheets(section, key, value) {
+function _writeSheets(section, key, value) {
   if (!_hasSheets()) return;
-  try {
-    const res = await fetch(SHEETS_API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ section, key, value })
-    });
-    const data = await res.json();
-    if (data && data.ok) _setSyncOk(true);
-    else { console.error('Sheets write rejected:', data); _setSyncOk(false); }
-  } catch (e) { console.error('Sheets write failed:', e); _setSyncOk(false); }
+  const writeId = section + '||' + key;
+  _pendingWrites.set(writeId, value);
+  fetch(SHEETS_API_URL, {
+    method: 'POST',
+    body: JSON.stringify({ section, key, value })
+  }).then(res => res.json()).then(data => {
+    if (data && data.ok) {
+      _setSyncOk(true);
+      // Segura o pending por mais um ciclo de poll: o append no Sheet propaga
+      // antes da proxima leitura, mas nao instantaneamente.
+      setTimeout(() => {
+        if (_pendingWrites.get(writeId) === value) _pendingWrites.delete(writeId);
+      }, _PENDING_TTL_MS);
+    } else {
+      console.error('Sheets write rejected:', data);
+      _setSyncOk(false);
+      _pendingWrites.delete(writeId);
+    }
+  }).catch(e => {
+    console.error('Sheets write failed:', e);
+    _setSyncOk(false);
+    _pendingWrites.delete(writeId);
+  });
 }
 
 async function _migrateLocalToSheetsIfEmpty() {
